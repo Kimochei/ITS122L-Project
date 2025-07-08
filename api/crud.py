@@ -39,6 +39,10 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
+def count_users(db: Session) -> int:
+    """Counts the total number of users in the database."""
+    return db.query(models.User).count()
+
 # END OF USER SECTION
 
 # POSTS SECTION
@@ -47,17 +51,31 @@ def get_posts(db: Session, skip: int = 0, limit: int = 10):
     """Reads a list of posts, newest first."""
     return db.query(models.Post).order_by(models.Post.created_at.desc()).offset(skip).limit(limit).all()
 
+def get_post(db: Session, post_id: int):
+    """Reads a single post by its ID."""
+    return db.query(models.Post).filter(models.Post.id == post_id).first()
+
 def create_post(db: Session, post: schemas.PostCreate, user_id: int):
-    """Creates a new post linked to a user (author)."""
-    db_post = models.Post(**post.dict(), author_id=user_id)
+    """Creates a new post and its associated images."""
+    # Create the post object first, but don't include image_urls
+    db_post = models.Post(title=post.title, content=post.content, author_id=user_id)
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
+
+    # Now, loop through the image URLs and create PostImage records
+    if post.image_urls:
+        for image_url in post.image_urls:
+            db_image = models.PostImage(url=image_url, post_id=db_post.id)
+            db.add(db_image)
+        db.commit()
+        db.refresh(db_post) # Refresh again to load the new images into the post object
+
     return db_post
 
 def update_post(db: Session, post_id: int, post_update: schemas.PostUpdate):
     """Updates an existing post."""
-    db_post = get_post(db, post_id=post_id)
+    db_post = get_post(db, post_id=post_id) # type: ignore
     if db_post:
         # Get the update data as a dictionary
         update_data = post_update.dict(exclude_unset=True)
@@ -70,7 +88,7 @@ def update_post(db: Session, post_id: int, post_update: schemas.PostUpdate):
 
 def delete_post(db: Session, post_id: int):
     """Deletes a post from the database by its ID."""
-    db_post = get_post(db, post_id=post_id)
+    db_post = get_post(db, post_id=post_id) # type: ignore
     if db_post:
         db.delete(db_post)
         db.commit()

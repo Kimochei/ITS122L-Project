@@ -1,0 +1,147 @@
+.page {
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.container {
+    display: flex;
+    gap: 40px;
+}
+
+.formColumn {
+    flex: 1;
+}
+
+.responseColumn {
+    flex: 1;
+}
+
+.form {
+    margin-bottom: 30px;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.input, .textarea {
+    display: block;
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.button {
+    padding: 10px 20px;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.responseBox {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    min-height: 400px;
+}
+
+.pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: black;
+}
+
+.errorText {
+    color: red;
+}
+
+.postsSection {
+    margin-top: 20px;
+}
+
+.post {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.postContent {
+    white-space: pre-wrap; /* Ensures line breaks in content are shown */
+}
+
+.commentsContainer {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #eee;
+}
+
+.comment {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px 0;
+}
+
+.comment p {
+    margin: 5px 0 0 0;
+}
+
+.flagged {
+    color: orange;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.postMeta {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: -10px;
+}
+
+.imageContainer {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 15px 0;
+}
+
+.postImage {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.uploadLabel {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+.previewContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+.previewItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+.previewImage {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.uploadedText {
+    color: green;
+    font-weight: bold;
+}

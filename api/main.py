@@ -7,6 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import crud, models, schemas, security
 from .database import SessionLocal, engine
 from .settings import ACCESS_TOKEN_EXPIRE_MINUTES
+from jose import JWTError, jwt
+from .settings import SECRET_KEY, ALGORITHM
+from supabase import create_client, Client
+from .settings import SUPABASE_URL, SUPABASE_KEY
 
 # Create all database tables (if they don't exist yet)
 models.Base.metadata.create_all(bind=engine)
@@ -26,6 +30,9 @@ app.add_middleware(
     allow_headers=["*"], # Allows all headers
 )
 
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+BUCKET_NAME = "post_images"
+
 # Dependency to get a DB session for each request
 def get_db():
     db = SessionLocal()
@@ -44,12 +51,26 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    # This part would need to be expanded to decode the JWT token
-    # For now, we'll just check if a user exists. A full implementation
-    # would decode the token and find the user by username/id from the token's payload.
-    user = crud.get_user_by_username(db, username="testuser") # Placeholder
-    if user is None:
+    try:
+        # Decode the token to get the payload
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # The 'sub' (subject) of the token is the username
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        # Create a TokenData object to validate the payload's shape
+        token_data = schemas.TokenData(username=username)
+    except JWTError:
+        # If the token is invalid (bad signature, expired, etc.), raise an error
         raise credentials_exception
+    
+    # Find the user in the database based on the username from the token
+    user = crud.get_user_by_username(db, username=token_data.username)
+    if user is None:
+        # If the user from the token doesn't exist in the DB, raise an error
+        raise credentials_exception
+    
+    # Return the user object if everything is valid
     return user
 
 def get_current_active_admin(current_user: schemas.User = Depends(get_current_user)):
@@ -95,7 +116,21 @@ def register_admin(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
-    return crud.create_user(db=db, user=user)
+
+    # Check if this is the first user being created
+    is_first_user = crud.count_users(db) == 0
+    
+    new_user = crud.create_user(db=db, user=user)
+
+    # If it's the first user, approve them automatically
+    if is_first_user:
+        new_user.is_approved = True
+        db.commit()
+        db.refresh(new_user)
+        # Log this special action
+        crud.create_activity_log(db, user=new_user, action="AUTO_APPROVED_FIRST_ADMIN")
+    
+    return new_user
 
 @app.get("/admin/pending", response_model=List[schemas.User])
 def get_pending_admins(db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
@@ -116,6 +151,32 @@ def approve_admin(user_id: int, db: Session = Depends(get_db), current_admin: sc
 
 
 # PUBLIC POSTS & COMMENTS
+
+@app.post("/admin/generate-upload-url")
+def create_upload_url(file_name: str, current_admin: schemas.User = Depends(get_current_active_admin)):
+    """
+    Generates a pre-signed URL for uploading and returns the final public URL.
+    """
+    try:
+        # Check if the bucket exists, create it if it doesn't
+        try:
+            supabase.storage.get_bucket(BUCKET_NAME)
+        except Exception:
+            supabase.storage.create_bucket(BUCKET_NAME, public=True)
+
+        path = f"{current_admin.id}/{file_name}"
+        signed_url_response = supabase.storage.from_(BUCKET_NAME).create_signed_upload_url(path)
+        
+        # --- NEW: Construct the public URL on the backend ---
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
+
+        return {
+            "signed_url": signed_url_response['signedURL'], 
+            "path": signed_url_response['path'],
+            "public_url": public_url  # <-- Send the final URL to the frontend
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/posts/", response_model=List[schemas.Post])
 def read_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):

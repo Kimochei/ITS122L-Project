@@ -22,9 +22,9 @@ class Post(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     content = Column(Text, nullable=False)
-    image_url = Column(String, nullable=True) # URL for an image or video
     created_at = Column(DateTime, default=datetime.utcnow)
     author_id = Column(Integer, ForeignKey("users.id"))
+    images = relationship("PostImage", back_populates="post", cascade="all, delete-orphan")
 
     # creates a link back to the User who wrote the post
     author = relationship("User", back_populates="posts")
@@ -64,3 +64,12 @@ class ActivityLog(Base):
     username = Column(String) # Storing username for easy display
     action = Column(String) # e.g., "CREATED_POST", "DELETED_COMMENT"
     details = Column(String, nullable=True) # e.g., "Post ID: 5", "Comment ID: 12"
+
+class PostImage(Base):
+    __tablename__ = "post_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    url = Column(String, nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+
+    post = relationship("Post", back_populates="images")

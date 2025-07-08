@@ -23,7 +23,7 @@ class User(UserBase):
 # Commect Schemas
 class CommentBase(BaseModel):
     content: str
-    author_name: Optional[str] = "Anonymous"
+    author_name: Optional[str] = "Anonymous Resident" 
 
 class CommentCreate(CommentBase):
     pass
@@ -40,13 +40,20 @@ class Comment(CommentBase):
 # end of COMMENT SCHEMAS
 
 # Post Schemas
+
+class PostImage(BaseModel):
+    id: int
+    url: str
+
+    class Config:
+        from_attributes = True
+
 class PostBase(BaseModel):
     title: str
     content: str
-    image_url: Optional[str] = None
 
 class PostCreate(PostBase):
-    pass
+    image_urls: Optional[List[str]] = []
 
 class PostUpdate(PostBase):
     pass
@@ -56,7 +63,8 @@ class Post(PostBase):
     id: int
     created_at: datetime
     author: User
-    comments: List[Comment] = [] # <-- MODIFIED: Include a list of comments
+    comments: List[Comment] = []
+    images: List[PostImage] = []
 
     class Config:
         orm_mode = True
