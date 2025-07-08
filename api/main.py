@@ -1,1 +1,204 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
+from typing import List
+from datetime import timedelta
+from fastapi.middleware.cors import CORSMiddleware
+from . import crud, models, schemas, security
+from .database import SessionLocal, engine
+from .settings import ACCESS_TOKEN_EXPIRE_MINUTES
+
+# Create all database tables (if they don't exist yet)
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="sKonnect API")
+
+origins = [
+    "http://localhost:5173", # Your frontend's local development address
+    # add deployed frontend's URL here later
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"], # Allows all headers
+)
+
+# Dependency to get a DB session for each request
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# OAuth2 scheme for token authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# Dependency to get the current logged-in user
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    # This part would need to be expanded to decode the JWT token
+    # For now, we'll just check if a user exists. A full implementation
+    # would decode the token and find the user by username/id from the token's payload.
+    user = crud.get_user_by_username(db, username="testuser") # Placeholder
+    if user is None:
+        raise credentials_exception
+    return user
+
+def get_current_active_admin(current_user: schemas.User = Depends(get_current_user)):
+    """
+    Dependency to get the current user and verify they are an active, approved admin.
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User does not have admin privileges"
+        )
+    if not current_user.is_approved:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin account is not approved"
+        )
+    return current_user
+
+# Authentication Endpoints
+
+@app.post("/token", response_model=schemas.Token)
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = crud.get_user_by_username(db, username=form_data.username)
+    if not user or not security.verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_approved:
+        raise HTTPException(status_code=400, detail="Admin account not yet approved")
+        
+    access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    access_token = security.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# User, Admin Routes
+
+@app.post("/register/", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
+def register_admin(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_username(db, username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    return crud.create_user(db=db, user=user)
+
+@app.get("/admin/pending", response_model=List[schemas.User])
+def get_pending_admins(db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    users = crud.get_users(db)
+    pending_users = [user for user in users if not user.is_approved]
+    return pending_users
+
+# This endpoint is a placeholder for approving an admin
+@app.put("/admin/approve/{user_id}", response_model=schemas.User)
+def approve_admin(user_id: int, db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    user_to_approve = crud.get_user(db, user_id=user_id)
+    if not user_to_approve:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_to_approve.is_approved = True
+    db.commit()
+    db.refresh(user_to_approve)
+    return user_to_approve
+
+
+# PUBLIC POSTS & COMMENTS
+
+@app.get("/posts/", response_model=List[schemas.Post])
+def read_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    posts = crud.get_posts(db, skip=skip, limit=limit)
+    return posts
+
+@app.get("/posts/{post_id}", response_model=schemas.Post)
+def read_post(post_id: int, db: Session = Depends(get_db)):
+    db_post = crud.get_post(db, post_id=post_id)
+    if db_post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return db_post
+
+@app.post("/posts/{post_id}/comments/", response_model=schemas.Comment, status_code=status.HTTP_201_CREATED)
+def create_comment_for_post(post_id: int, comment: schemas.CommentCreate, db: Session = Depends(get_db)):
+    db_post = crud.get_post(db, post_id=post_id)
+    if db_post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return crud.create_comment(db=db, comment=comment, post_id=post_id)
+
+
+# ADMIN POSTS
+
+@app.post("/admin/posts/", response_model=schemas.Post, status_code=status.HTTP_201_CREATED)
+def create_new_post(post: schemas.PostCreate, db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    new_post = crud.create_post(db=db, post=post, user_id=current_admin.id)
+    crud.create_activity_log(db, user=current_admin, action="CREATED_POST", details=f"Post ID: {new_post.id}")
+  
+    return new_post
+
+@app.put("/admin/posts/{post_id}", response_model=schemas.Post)
+def edit_post(post_id: int, post: schemas.PostUpdate, db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    db_post = crud.get_post(db, post_id=post_id)
+    if db_post is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    return crud.update_post(db=db, post_id=post_id, post_update=post)
+
+@app.delete("/admin/posts/{post_id}", response_model=schemas.Post)
+def delete_a_post(post_id: int, db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    """
+    Deletes a post by its ID. Only accessible by approved admins.
+    """
+    post_to_delete = crud.get_post(db, post_id=post_id)
+    if not post_to_delete:
+        raise HTTPException(status_code=404, detail="Post not found")
+        
+    crud.delete_post(db, post_id=post_id)
+    crud.create_activity_log(db, user=current_admin, action="DELETED_POST", details=f"Post ID: {post_id}, Title: {post_to_delete.title}")
+    
+    # The post object is returned before it's deleted from the DB session
+    return post_to_delete
+
+@app.delete("/admin/comments/{comment_id}", response_model=schemas.Comment)
+def delete_a_comment(comment_id: int, db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    """
+    Deletes a comment by its ID. Useful for removing inappropriate comments.
+    Only accessible by approved admins.
+    """
+    comment_to_delete = crud.get_comment(db, comment_id=comment_id)
+    if not comment_to_delete:
+        raise HTTPException(status_code=404, detail="Comment not found")
+        
+    crud.delete_comment(db, comment_id=comment_id)
+    
+    return comment_to_delete
+
+# DOCUMENT REQUESTS
+
+@app.post("/requests/", response_model=schemas.DocumentRequest, status_code=status.HTTP_201_CREATED)
+def submit_document_request(request: schemas.DocumentRequestCreate, db: Session = Depends(get_db)):
+    return crud.create_document_request(db=db, request=request)
+
+@app.get("/admin/requests/", response_model=List[schemas.DocumentRequest])
+def view_document_requests(db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    return crud.get_document_requests(db)
+
+# Audit Logging
+
+@app.get("/admin/logs/", response_model=List[schemas.ActivityLog])
+def read_activity_logs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
+    """
+    Retrieves a list of all admin activity logs.
+    """
+    logs = crud.get_activity_logs(db, skip=skip, limit=limit)
+    return logs
