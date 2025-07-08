@@ -1,7 +1,9 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
+from .schemas import RequestStatus
+import enum
 
 class User(Base):
     __tablename__ = "users"
@@ -73,3 +75,17 @@ class PostImage(Base):
     post_id = Column(Integer, ForeignKey("posts.id"))
 
     post = relationship("Post", back_populates="images")
+
+class Request(Base):
+    __tablename__ = "requests"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, index=True)
+    address = Column(String, nullable=False)
+    request_type = Column(String, nullable=False)
+    
+    status = Column(String, nullable=False, default=RequestStatus.pending)
+    description = Column(String, nullable=True)
+    
+    # This line requires the 'func' import
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

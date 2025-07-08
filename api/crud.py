@@ -166,3 +166,13 @@ def get_activity_logs(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.ActivityLog).order_by(models.ActivityLog.timestamp.desc()).offset(skip).limit(limit).all()
 
 # END OF ACTIVITY LOGS
+
+def create_request(db: Session, request: schemas.RequestCreate):
+    db_request = models.Request(**request.dict())
+    db.add(db_request)
+    db.commit()
+    db.refresh(db_request)
+    return db_request
+
+def get_request_by_id(db: Session, request_id: int):
+    return db.query(models.Request).filter(models.Request.id == request_id).first()

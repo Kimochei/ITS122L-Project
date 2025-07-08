@@ -14,6 +14,14 @@ interface UploadedImage {
   fileName: string;
   publicUrl: string;
 }
+interface DocumentRequest {
+  full_name: string;
+  request_type: string;
+  purpose: string;
+  id: number;
+  status: string;
+  submitted_at: string;
+}
 
 const ApiTestPage: React.FC = () => {
   // State for Admin management
@@ -34,6 +42,12 @@ const ApiTestPage: React.FC = () => {
   const [commentContent, setCommentContent] = useState('');
   const [commentPostId, setCommentPostId] = useState('');
   const [commentAuthorName, setCommentAuthorName] = useState('');
+
+  // State for Document Request
+  const [docFullName, setDocFullName] = useState('');
+  const [docRequestType, setDocRequestType] = useState('');
+  const [docPurpose, setDocPurpose] = useState('');
+  const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([]);
 
   // State for API interaction and display
   const [apiResponse, setApiResponse] = useState<any>(null);
@@ -188,6 +202,42 @@ const ApiTestPage: React.FC = () => {
     }
   };
 
+  const handleSubmitDocumentRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`${API_URL}/requests/`, {
+        full_name: docFullName,
+        request_type: docRequestType,
+        purpose: docPurpose,
+      });
+      setApiResponse(response.data);
+      setModalContent('Document request submitted successfully!');
+      setIsModalOpen(true);
+      setApiError('');
+      setDocFullName('');
+      setDocRequestType('');
+      setDocPurpose('');
+    } catch (error: any) {
+      setApiError(JSON.stringify(error.response?.data, null, 2));
+      setApiResponse(null);
+    }
+  };
+
+  const handleFetchDocumentRequests = async () => {
+    if (!accessToken) {
+      setApiError('You must be logged in as an admin to view requests.');
+      return;
+    }
+    try {
+      const response = await axios.get(`${API_URL}/admin/requests/`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setDocumentRequests(response.data);
+    } catch (error: any) {
+      setApiError(JSON.stringify(error.response?.data, null, 2));
+    }
+  };
+
   useEffect(() => {
     handleFetchPosts();
   }, []);
@@ -258,6 +308,14 @@ const ApiTestPage: React.FC = () => {
             <textarea placeholder="Comment Content" value={commentContent} onChange={(e) => setCommentContent(e.target.value)} required className={styles.textarea} />
             <button type="submit" className={styles.button}>Create Comment</button>
           </form>
+
+          <form onSubmit={handleSubmitDocumentRequest} className={styles.form}>
+            <h2>Submit Document Request</h2>
+            <input type="text" placeholder="Full Name" value={docFullName} onChange={(e) => setDocFullName(e.target.value)} required className={styles.input} />
+            <input type="text" placeholder="Request Type (e.g., Barangay Clearance)" value={docRequestType} onChange={(e) => setDocRequestType(e.target.value)} required className={styles.input} />
+            <textarea placeholder="Purpose" value={docPurpose} onChange={(e) => setDocPurpose(e.target.value)} required className={styles.textarea} />
+            <button type="submit" className={styles.button}>Submit Request</button>
+          </form>
         </div>
         
         <div className={styles.responseColumn}>
@@ -312,6 +370,31 @@ const ApiTestPage: React.FC = () => {
           <p>No posts found. Create one to see it here!</p>
         )}
       </div>
+      <hr style={{margin: '40px 0'}}/>
+
+      <div className={styles.postsSection}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
+              <h2>Document Requests (Admin View)</h2>
+              <button onClick={handleFetchDocumentRequests} className={styles.button}>
+                  Fetch Document Requests
+              </button>
+          </div>
+          {documentRequests.length > 0 ? (
+              documentRequests.map((request) => (
+                  <div key={request.id} className={styles.post}>
+                      <h3>Request ID: {request.id}</h3>
+                      <p><strong>Name:</strong> {request.full_name}</p>
+                      <p><strong>Type:</strong> {request.request_type}</p>
+                      <p><strong>Purpose:</strong> {request.purpose}</p>
+                      <p><strong>Status:</strong> {request.status}</p>
+                      <p><strong>Submitted:</strong> {new Date(request.submitted_at).toLocaleString()}</p>
+                  </div>
+              ))
+          ) : (
+              <p>No document requests found or you are not logged in as an admin.</p>
+          )}
+      </div>
+
     </div>
   );
 };

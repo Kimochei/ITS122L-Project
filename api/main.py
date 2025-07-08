@@ -11,6 +11,13 @@ from jose import JWTError, jwt
 from .settings import SECRET_KEY, ALGORITHM
 from supabase import create_client, Client
 from .settings import SUPABASE_URL, SUPABASE_KEY
+import os
+import socket
+from urllib.parse import urlparse
+from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+from typing import List
+from ..database import get_db
 
 # Create all database tables (if they don't exist yet)
 models.Base.metadata.create_all(bind=engine)
@@ -31,7 +38,36 @@ app.add_middleware(
 )
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-BUCKET_NAME = "post_images"
+BUCKET_NAME = "post-images"
+
+print("--- Starting Connection Debug ---")
+
+# 1. Load environment variables from .env file
+load_dotenv()
+database_url = os.getenv("DATABASE_URL")
+
+# 2. Print the URL to check if it's loaded correctly
+if database_url:
+    print(f"Successfully loaded DATABASE_URL: {database_url}")
+else:
+    print("ERROR: DATABASE_URL not found in environment. Check your .env file.")
+    exit() # Stop the script if the URL isn't even found
+
+# 3. Extract and test the hostname
+try:
+    # This parses the URL to get just the hostname part
+    hostname = urlparse(database_url).hostname
+    print(f"Extracted hostname to test: {hostname}")
+    
+    # 4. Try to resolve the hostname, just like psycopg2 does
+    ip_address = socket.gethostbyname(hostname)
+    print(f"SUCCESS: Hostname resolved to IP Address: {ip_address}")
+
+except Exception as e:
+    print(f"\nCRITICAL ERROR: Could not resolve hostname '{hostname}'.")
+    print(f"This confirms the issue is with network/DNS lookup, not SQLAlchemy.")
+    print(f"Python's socket library failed with error: {e}")
+    exit() # Stop the script
 
 # Dependency to get a DB session for each request
 def get_db():
@@ -162,7 +198,7 @@ def create_upload_url(file_name: str, current_admin: schemas.User = Depends(get_
         try:
             supabase.storage.get_bucket(BUCKET_NAME)
         except Exception:
-            supabase.storage.create_bucket(BUCKET_NAME, public=True)
+            supabase.storage.create_bucket(BUCKET_NAME, options={"public": True})
 
         path = f"{current_admin.id}/{file_name}"
         signed_url_response = supabase.storage.from_(BUCKET_NAME).create_signed_upload_url(path)
@@ -171,7 +207,7 @@ def create_upload_url(file_name: str, current_admin: schemas.User = Depends(get_
         public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
 
         return {
-            "signed_url": signed_url_response['signedURL'], 
+            "signed_url": signed_url_response['signed_url'],
             "path": signed_url_response['path'],
             "public_url": public_url  # <-- Send the final URL to the frontend
         }
@@ -253,6 +289,25 @@ def submit_document_request(request: schemas.DocumentRequestCreate, db: Session 
 @app.get("/admin/requests/", response_model=List[schemas.DocumentRequest])
 def view_document_requests(db: Session = Depends(get_db), current_admin: schemas.User = Depends(get_current_active_admin)):
     return crud.get_document_requests(db)
+
+@app.post("/requests/", response_model=schemas.Request, status_code=status.HTTP_201_CREATED, tags=["Public Requests"])
+def submit_request(
+    request: schemas.RequestCreate,
+    db: Session = Depends(get_db) # <-- This uses the get_db function defined above
+):
+    return crud.create_request(db=db, request=request)
+
+@app.get("/requests/{request_id}", response_model=schemas.Request, tags=["Public Requests"])
+def track_request_status(
+    request_id: int,
+    db: Session = Depends(get_db) # <-- This also uses the get_db function
+):
+    db_request = crud.get_request_by_id(db, request_id=request_id)
+
+    if db_request is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    return db_request
 
 # Audit Logging
 

@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import List, Optional
+from pydantic import BaseModel, Field
+from enum import Enum
 
 # User Schemas
 class UserBase(BaseModel):
@@ -100,6 +102,35 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class RequestType(str, Enum):
+    barangay_certificate = "Barangay Certificate"
+    event_request = "Event Request"
+    others = "Others"
+
+class RequestStatus(str, Enum):
+    pending = "Pending"
+    approved = "Approved"
+    rejected = "Rejected"
+    completed = "Completed"
+
+class RequestCreate(BaseModel):
+    name: str = Field(..., example="Juan Dela Cruz")
+    address: str = Field(..., example="123 Rizal St, Brgy. San Jose")
+    request_type: RequestType
+    description: str | None = None
+
+class Request(BaseModel):
+    id: int
+    name: str
+    address: str
+    request_type: RequestType
+    status: RequestStatus
+    description: str | None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 # end of TOKEN SCHEMAS
 

@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database/sKonnectDB.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
 SECRET_KEY="..."
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
