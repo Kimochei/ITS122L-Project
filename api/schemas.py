@@ -130,6 +130,10 @@ class Request(BaseModel):
     created_at: datetime
 
     class Config:
+        # Change this:
+        # orm_mode = True
+        
+        # To this:
         from_attributes = True
 
 # end of TOKEN SCHEMAS

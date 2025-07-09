@@ -17,7 +17,6 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from typing import List
-from ..database import get_db
 
 # Create all database tables (if they don't exist yet)
 models.Base.metadata.create_all(bind=engine)
@@ -300,8 +299,11 @@ def submit_request(
 @app.get("/requests/{request_id}", response_model=schemas.Request, tags=["Public Requests"])
 def track_request_status(
     request_id: int,
-    db: Session = Depends(get_db) # <-- This also uses the get_db function
+    db: Session = Depends(get_db)
 ):
+    """
+    Track the status of a specific request using its ID.
+    """
     db_request = crud.get_request_by_id(db, request_id=request_id)
 
     if db_request is None:
