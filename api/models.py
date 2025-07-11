@@ -1,91 +1,106 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime, func
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Enum as SQLAlchemyEnum,
+)
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy.sql import func
 from .database import Base
-from .schemas import RequestStatus
-import enum
+from .schemas import RequestStatus, MediaType # Import the enums
+
+# =================================
+#  User & Activity Log Models
+# =================================
 
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_admin = Column(Boolean, default=True)
     is_approved = Column(Boolean, default=False)
-    is_admin = Column(Boolean, default=True) # All users are admins-in-waiting or approved admins
 
-    # creates a link between a User and all their Posts
     posts = relationship("Post", back_populates="author")
-
-class Post(Base):
-    __tablename__ = "posts"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    content = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    author_id = Column(Integer, ForeignKey("users.id"))
-    images = relationship("PostImage", back_populates="post", cascade="all, delete-orphan")
-
-    # creates a link back to the User who wrote the post
-    author = relationship("User", back_populates="posts")
-    # link between a post and its comments
-    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
-
-class DocumentRequest(Base):
-    __tablename__ = "document_requests"
-
-    id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, index=True)
-    request_type = Column(String)
-    purpose = Column(Text)
-    status = Column(String, default="Pending") # e.g., "Pending", "Processing", "Ready for Pickup"
-    submitted_at = Column(DateTime, default=datetime.utcnow)
-
-class Comment(Base):
-    __tablename__ = "comments"
-
-    id = Column(Integer, primary_key=True, index=True)
-    content = Column(Text, nullable=False)
-    author_name = Column(String, nullable=True) # For optional name
-    is_flagged = Column(Boolean, default=False)
-    flagged_reason = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    post_id = Column(Integer, ForeignKey("posts.id"))
-
-    # This creates a link back to the Post the comment belongs to
-    post = relationship("Post", back_populates="comments")
+    activity_logs = relationship("ActivityLog", back_populates="user")
 
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    # This ensures the database automatically sets the timestamp on creation
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
-    username = Column(String) # Storing username for easy display
-    action = Column(String) # e.g., "CREATED_POST", "DELETED_COMMENT"
-    details = Column(String, nullable=True) # e.g., "Post ID: 5", "Comment ID: 12"
+    
+    # We will store the username directly for easier querying and display
+    username = Column(String, nullable=False) 
+    
+    action = Column(String, nullable=False)
+    details = Column(String, nullable=True)
 
-class PostImage(Base):
-    __tablename__ = "post_images"
+    user = relationship("User", back_populates="activity_logs")
+
+# =================================
+#  Post, Media, & Comment Models
+# =================================
+
+class Post(Base):
+    __tablename__ = "posts"
 
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True, nullable=False)
+    content = Column(String)
+    primary_image_url = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    author_id = Column(Integer, ForeignKey("users.id"))
+
+    author = relationship("User", back_populates="posts")
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
+    media = relationship("Media", back_populates="post", cascade="all, delete-orphan")
+
+class Media(Base):
+    __tablename__ = "media"
+    
+    id = Column(Integer, primary_key=True, index=True)
     url = Column(String, nullable=False)
+    media_type = Column(SQLAlchemyEnum(MediaType), nullable=False) # Uses the MediaType enum
     post_id = Column(Integer, ForeignKey("posts.id"))
 
-    post = relationship("Post", back_populates="images")
+    post = relationship("Post", back_populates="media")
 
-class Request(Base):
-    __tablename__ = "requests"
+class Comment(Base):
+    __tablename__ = "comments"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, index=True)
-    address = Column(String, nullable=False)
-    request_type = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(String, nullable=False)
+    author_name = Column(String, default="Anonymous")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_inappropriate = Column(Boolean, default=False)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+
+    post = relationship("Post", back_populates="comments")
+
+# =================================
+#  Document Request Model
+# =================================
+
+class DocumentRequest(Base):
+    __tablename__ = "document_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    request_type = Column(String, index=True)
+    purpose = Column(String)
     
-    status = Column(String, nullable=False, default=RequestStatus.pending)
-    description = Column(String, nullable=True)
+    request_token = Column(String, unique=True, index=True, nullable=False)
     
-    # This line requires the 'func' import
+    # ▼▼▼ THIS IS THE CORRECTED LINE ▼▼▼
+    # Change SQLAlchemyEnum to String to store the status as plain text
+    status = Column(String, nullable=False, default=RequestStatus.PENDING.value) 
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())

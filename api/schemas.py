@@ -1,31 +1,69 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, computed_field # <-- FIX IS HERE
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field
 from enum import Enum
 
-# User Schemas
+# =================================
+#  Enumerations
+# =================================
+
+class RequestStatus(str, Enum):
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+    COMPLETED = "Completed"
+
+class MediaType(str, Enum):
+    IMAGE = "image"
+    VIDEO = "video"
+
+# =================================
+#  User & Authentication Schemas
+# =================================
+
 class UserBase(BaseModel):
     username: str
     email: EmailStr
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(..., min_length=8)
 
 class User(UserBase):
     id: int
-    is_approved: bool
     is_admin: bool
+    is_approved: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-# enf of USER SCHEMAS
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-# Commect Schemas
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+# =================================
+#  Post, Media, & Comment Schemas
+# =================================
+
+class MediaBase(BaseModel):
+    url: str
+    media_type: MediaType
+
+class MediaCreate(MediaBase):
+    pass
+
+class Media(MediaBase):
+    id: int
+    post_id: int
+
+    class Config:
+        from_attributes = True
+
 class CommentBase(BaseModel):
     content: str
-    author_name: Optional[str] = "Anonymous Resident" 
+    author_name: Optional[str] = "Anonymous"
 
 class CommentCreate(CommentBase):
     pass
@@ -34,121 +72,79 @@ class Comment(CommentBase):
     id: int
     created_at: datetime
     post_id: int
-    is_flagged: bool
-
-    class Config:
-        from_attributes = True 
-
-# end of COMMENT SCHEMAS
-
-# Post Schemas
-
-class PostImage(BaseModel):
-    id: int
-    url: str
+    is_inappropriate: bool = False
 
     class Config:
         from_attributes = True
 
 class PostBase(BaseModel):
     title: str
-    content: str
+    content: Optional[str] = None
 
 class PostCreate(PostBase):
-    image_urls: Optional[List[str]] = []
+    primary_image_url: Optional[str] = None
+    media: List[MediaCreate] = []
 
 class PostUpdate(PostBase):
     pass
 
-# This schema is used when returning a post from the API.
 class Post(PostBase):
     id: int
     created_at: datetime
     author: User
+    primary_image_url: Optional[str] = None
     comments: List[Comment] = []
-    images: List[PostImage] = []
+    media: List[Media] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-# end of POST SCHEMAS
+# =================================
+#  Document Request Schemas
+# =================================
 
-# Document Request Schemas
 class DocumentRequestBase(BaseModel):
-    full_name: str
-    request_type: str
-    purpose: str
+    name: str = Field(..., example="Juan Dela Cruz")
+    request_type: str = Field(..., example="Barangay Certificate")
+    purpose: str = Field(..., example="For employment application")
 
 class DocumentRequestCreate(DocumentRequestBase):
     pass
 
 class DocumentRequestUpdate(BaseModel):
-    status: str
+    status: RequestStatus
 
 class DocumentRequest(DocumentRequestBase):
     id: int
-    status: str
-    submitted_at: datetime
-
-    class Config:
-        orm_mode = True
-
-# end of DOC. REQUEST SCHEMA
-
-# token schemas
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-
-class RequestType(str, Enum):
-    barangay_certificate = "Barangay Certificate"
-    event_request = "Event Request"
-    others = "Others"
-
-class RequestStatus(str, Enum):
-    pending = "Pending"
-    approved = "Approved"
-    rejected = "Rejected"
-    completed = "Completed"
-
-class RequestCreate(BaseModel):
-    name: str = Field(..., example="Juan Dela Cruz")
-    address: str = Field(..., example="123 Rizal St, Brgy. San Jose")
-    request_type: RequestType
-    description: str | None = None
-
-class Request(BaseModel):
-    id: int
-    name: str
-    address: str
-    request_type: RequestType
+    request_token: str
     status: RequestStatus
-    description: str | None
     created_at: datetime
 
     class Config:
-        # Change this:
-        # orm_mode = True
-        
-        # To this:
         from_attributes = True
 
-# end of TOKEN SCHEMAS
+class DocumentRequestCreateResponse(BaseModel):
+    message: str
+    request_token: str
+    status: RequestStatus
 
-# ACTIVITY LOGS
+# =================================
+#  Activity Log Schemas
+# =================================
 
 class ActivityLog(BaseModel):
     id: int
     timestamp: datetime
     user_id: int
-    username: str
     action: str
     details: Optional[str] = None
+    
+    user: User 
+
+    @computed_field
+    @property
+    def username(self) -> str:
+        return self.user.username
 
     class Config:
         from_attributes = True
-
-# end of ACTIVITY LOGS

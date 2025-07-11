@@ -1,400 +1,306 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styles from '../pagestyles/ApiTestPage.module.css';
-import Modal from '../components/Modal'; // Assuming Modal.tsx is in src/components/
+import styles from '../pagestyles/ApiTestPage.module.css'; // This uses the same CSS as before
 
-const API_URL = 'http://localhost:8000';
+// Setup Axios instance
+const api = axios.create({
+  baseURL: 'http://localhost:8000',
+});
 
-// Define types for better state management
-interface FilePreview {
-  file: File;
-  previewUrl: string;
-}
-interface UploadedImage {
-  fileName: string;
-  publicUrl: string;
-}
-interface DocumentRequest {
-  full_name: string;
-  request_type: string;
-  purpose: string;
-  id: number;
-  status: string;
-  submitted_at: string;
-}
+const ApiTestPage = () => {
+  // --- STATE MANAGEMENT ---
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [apiResponse, setApiResponse] = useState<object | null>({ message: "Ready..." });
+  const [loginStatus, setLoginStatus] = useState<string>("Not logged in.");
 
-const ApiTestPage: React.FC = () => {
-  // State for Admin management
-  const [registerUsername, setRegisterUsername] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [loginUsername, setLoginUsername] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  // Generic Inputs
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [userId, setUserId] = useState('');
+  const [postId, setPostId] = useState('');
+  const [commentId, setCommentId] = useState('');
+  const [requestId, setRequestId] = useState('');
+  const [requestToken, setRequestToken] = useState('');
 
-  // State for Post creation
+  // Form-specific inputs
   const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState<FilePreview[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-
-  // State for Comment creation
+  const [primaryImage, setPrimaryImage] = useState<File | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<FileList | null>(null);
   const [commentContent, setCommentContent] = useState('');
-  const [commentPostId, setCommentPostId] = useState('');
-  const [commentAuthorName, setCommentAuthorName] = useState('');
+  const [reqName, setReqName] = useState('');
+  const [reqType, setReqType] = useState('Barangay Certificate');
+  const [reqPurpose, setReqPurpose] = useState('');
+  const [reqStatus, setReqStatus] = useState('Pending');
 
-  // State for Document Request
-  const [docFullName, setDocFullName] = useState('');
-  const [docRequestType, setDocRequestType] = useState('');
-  const [docPurpose, setDocPurpose] = useState('');
-  const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([]);
 
-  // State for API interaction and display
-  const [apiResponse, setApiResponse] = useState<any>(null);
-  const [apiError, setApiError] = useState<string>('');
-  const [posts, setPosts] = useState<any[]>([]);
-
-  // State for Modal pop-ups
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState('');
-
-  // --- HANDLER FUNCTIONS ---
-
-  const handleRegisterAdmin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(`${API_URL}/register/`, {
-        username: registerUsername, email: registerEmail, password: registerPassword,
-      });
-      setApiResponse(response.data);
-      setModalContent(`Admin "${response.data.username}" registered! If this is the first admin, they are auto-approved. Otherwise, an existing admin must approve them.`);
-      setIsModalOpen(true);
-      setApiError('');
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-      setApiResponse(null);
+  // --- HOOKS ---
+  useEffect(() => {
+    if (authToken) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+      setLoginStatus(`Logged in as ${username}. Token is active.`);
+    } else {
+      delete api.defaults.headers.common['Authorization'];
+      setLoginStatus("Not logged in.");
     }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const loginData = new URLSearchParams();
-    loginData.append('username', loginUsername);
-    loginData.append('password', loginPassword);
-    try {
-      const response = await axios.post(`${API_URL}/token`, loginData, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      });
-      setAccessToken(response.data.access_token);
-      setApiResponse(response.data);
-      setApiError('');
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-      setApiResponse(null);
-    }
-  };
-  
-  const handleLogout = () => {
-    setAccessToken(null);
-    setApiResponse({ detail: "Successfully logged out." });
-    setApiError('');
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const filePreviews = files.map(file => ({
-        file,
-        previewUrl: URL.createObjectURL(file)
-      }));
-      setSelectedFiles(prev => [...prev, ...filePreviews]);
-    }
-  };
-
-  const handleConfirmUpload = async (file: File) => {
-    if (!accessToken) {
-      setApiError('You must be logged in to upload files.');
-      return;
-    }
-    try {
-      // 1. Get the pre-signed URL and the final public URL from our backend
-      const urlResponse = await axios.post(
-        `${API_URL}/admin/generate-upload-url?file_name=${file.name}`,
-        {},
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      const { signed_url, public_url } = urlResponse.data;
-
-      // 2. Upload the file directly to Supabase using the signed URL
-      await axios.put(signed_url, file, {
-        headers: { 'Content-Type': file.type }
-      });
-      
-      // 3. Use the public_url provided by the backend
-      const newImage = { fileName: file.name, publicUrl: public_url };
-      setUploadedImages(prev => [...prev, newImage]);
-
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-    }
-  };
-
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!accessToken) {
-      setApiError('You must log in first.');
-      return;
-    }
-    try {
-      const imageUrls = uploadedImages.map(img => img.publicUrl);
-      const response = await axios.post(`${API_URL}/admin/posts/`, {
-        title: postTitle,
-        content: postContent,
-        image_urls: imageUrls,
-      }, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      setApiResponse(response.data);
-      setApiError('');
-      setPostTitle('');
-      setPostContent('');
-      setSelectedFiles([]);
-      setUploadedImages([]);
-      setModalContent('Post created successfully!');
-      setIsModalOpen(true);
-      handleFetchPosts();
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-    }
-  };
-
-  const handleCreateComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentPostId) {
-      setApiError('Please provide a Post ID for the comment.');
-      return;
-    }
-    const payload: { content: string; author_name?: string } = {
-      content: commentContent,
-    };
-    if (commentAuthorName) {
-      payload.author_name = commentAuthorName;
-    }
-    try {
-      const response = await axios.post(`${API_URL}/posts/${commentPostId}/comments/`, payload);
-      setApiResponse(response.data);
-      setApiError('');
-      setCommentContent('');
-      setCommentAuthorName('');
-      handleFetchPosts();
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-      setApiResponse(null);
-    }
-   };
-
-   const handleFetchPosts = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/posts/`);
-      setPosts(response.data);
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-    }
-  };
-
-  const handleSubmitDocumentRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(`${API_URL}/requests/`, {
-        full_name: docFullName,
-        request_type: docRequestType,
-        purpose: docPurpose,
-      });
-      setApiResponse(response.data);
-      setModalContent('Document request submitted successfully!');
-      setIsModalOpen(true);
-      setApiError('');
-      setDocFullName('');
-      setDocRequestType('');
-      setDocPurpose('');
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-      setApiResponse(null);
-    }
-  };
-
-  const handleFetchDocumentRequests = async () => {
-    if (!accessToken) {
-      setApiError('You must be logged in as an admin to view requests.');
-      return;
-    }
-    try {
-      const response = await axios.get(`${API_URL}/admin/requests/`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      setDocumentRequests(response.data);
-    } catch (error: any) {
-      setApiError(JSON.stringify(error.response?.data, null, 2));
-    }
-  };
+  }, [authToken, username]);
 
   useEffect(() => {
-    handleFetchPosts();
+    fetchPosts(); // Automatically load posts on page load
   }, []);
 
+  // --- HELPER FUNCTIONS ---
+  const handleApiResponse = (response: object) => {
+    setApiResponse(response);
+    console.log(response);
+  };
+  
+  const handleError = (error: any) => {
+    const errorData = error.response ? error.response.data : { message: error.message };
+    handleApiResponse(errorData);
+  }
+
+  // --- API HANDLERS (Functions are the same as before) ---
+
+  // 1. Register Admin
+  const handleRegister = async () => {
+    try {
+      const response = await api.post('/register/', { username, email, password });
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 2. Login
+  const handleLogin = async () => {
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    try {
+      const response = await api.post('/token', formData);
+      setAuthToken(response.data.access_token);
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 4. Get Pending Admins
+  const fetchPendingAdmins = async () => {
+    try {
+      const response = await api.get('/admin/pending');
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 5. Approve Admin
+  const handleApproveAdmin = async () => {
+    try {
+      const response = await api.put(`/admin/approve/${userId}`);
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+  
+  // 6. Get Activity Logs
+  const fetchActivityLogs = async () => {
+    try {
+      const response = await api.get('/admin/logs/');
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 7. Create Post
+  const handleCreatePost = async () => {
+    try {
+        let primaryImageUrl = '';
+        if (primaryImage) {
+            const urlRes = await api.post(`/admin/generate-upload-url?file_name=${primaryImage.name}`);
+            await axios.put(urlRes.data.signed_url, primaryImage, { headers: { 'Content-Type': primaryImage.type } });
+            primaryImageUrl = urlRes.data.public_url;
+        }
+
+        const mediaItems = [];
+        if (mediaFiles) {
+            for (const file of Array.from(mediaFiles)) {
+                const urlRes = await api.post(`/admin/generate-upload-url?file_name=${file.name}`);
+                await axios.put(urlRes.data.signed_url, file, { headers: { 'Content-Type': file.type } });
+                mediaItems.push({ url: urlRes.data.public_url, media_type: file.type.startsWith('video') ? 'video' : 'image' });
+            }
+        }
+        
+        const postData = { title: postTitle, content: postContent, primary_image_url: primaryImageUrl, media: mediaItems };
+        const response = await api.post('/admin/posts/', postData);
+        handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 8. Get All Posts
+  const fetchPosts = async () => {
+    try {
+      const response = await api.get('/posts/');
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 9. Get Single Post
+  const fetchSinglePost = async () => {
+    try {
+      const response = await api.get(`/posts/${postId}`);
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 10. Update Post
+  const handleUpdatePost = async () => {
+    try {
+      const response = await api.put(`/admin/posts/${postId}`, { title: postTitle, content: postContent });
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 11. Delete Post
+  const handleDeletePost = async () => {
+    try {
+      const response = await api.delete(`/admin/posts/${postId}`);
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 12. Create Comment
+  const handleCreateComment = async () => {
+    try {
+      const response = await api.post(`/posts/${postId}/comments/`, { content: commentContent });
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 13. Delete Comment
+  const handleDeleteComment = async () => {
+    try {
+      const response = await api.delete(`/admin/comments/${commentId}`);
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 14. Submit Document Request
+  const handleSubmitRequest = async () => {
+    try {
+      const response = await api.post('/document-requests/', { name: reqName, request_type: reqType, purpose: reqPurpose });
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 15. Check Document Request Status
+  const handleCheckRequestStatus = async () => {
+    try {
+      const response = await api.get(`/document-requests/status/${requestToken}`);
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 16. Get All Document Requests
+  const fetchAllRequests = async () => {
+    try {
+      // Bypassed auth for testing
+      const response = await axios.get('http://localhost:8000/admin/requests/');
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+  // 17. Update Document Request Status
+  const handleUpdateRequestStatus = async () => {
+    try {
+      const response = await api.patch(`/admin/document-requests/${requestId}/status`, { status: reqStatus });
+      handleApiResponse(response.data);
+    } catch (error) { handleError(error); }
+  };
+
+
   return (
-    <div className={styles.page}>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <h3>Notification</h3>
-          <p>{modalContent}</p>
-      </Modal>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1> FastAPI Backend Test Page</h1>
-        {accessToken && (
-          <button onClick={handleLogout} className={styles.button} style={{ background: '#dc3545' }}>
-            Logout
-          </button>
-        )}
+    <div className={styles.pageContainer}>
+      <h1 className={styles.header}>API Test Page</h1>
+      
+      {/* STATUS BAR */}
+      <div className={styles.statusBar} style={{ background: authToken ? '#a5d6a7' : '#ef9a9a', border: `1px solid ${authToken ? 'green' : 'red'}` }}>
+        <strong>Status:</strong> {loginStatus}
       </div>
-      {accessToken && <p style={{background: 'lightgreen', padding: '10px', borderRadius: '5px'}}>✅ Logged In! You can now use protected endpoints.</p>}
 
-      <div className={styles.container}>
-        <div className={styles.formColumn}>
-          <form onSubmit={handleRegisterAdmin} className={styles.form}>
-            <h2>1. Register New Admin</h2>
-            <input type="text" placeholder="Username" value={registerUsername} onChange={(e) => setRegisterUsername(e.target.value)} required className={styles.input} />
-            <input type="email" placeholder="Email" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} required className={styles.input} />
-            <input type="password" placeholder="Password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} required className={styles.input} />
-            <button type="submit" className={styles.button}>Register Admin</button>
-          </form>
+      {/* Main content grid starts here */}
+      <div className={styles.mainGrid}>
+        
+        {/* ADMIN & AUTH (Column 1) */}
+        <div className={styles.apiSection}>
+          <h2>Admin & Authentication</h2>
+          <div className={styles.formGrid}>
+            <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} className={styles.input} />
+            <button onClick={handleLogin} className={styles.button}>2. Login</button>
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={styles.input} />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className={styles.input} />
+            <button onClick={handleRegister} className={styles.button} style={{gridColumn: '1 / -1'}}>1. Register Admin</button>
+            <hr style={{gridColumn: '1 / -1', border: 'none', borderTop: '1px solid #34495e'}}/>
+            <input type="text" placeholder="User ID to Approve" value={userId} onChange={(e) => setUserId(e.target.value)} className={styles.input} />
+            <button onClick={handleApproveAdmin} className={styles.button}>5. Approve Admin</button>
+            <button onClick={fetchPendingAdmins} className={styles.button} style={{gridColumn: '1 / -1'}}>4. Get Pending Admins</button>
+            <button onClick={fetchActivityLogs} className={styles.button} style={{gridColumn: '1 / -1'}}>6. Get Activity Logs</button>
+          </div>
+        </div>
 
-          <form onSubmit={handleLogin} className={styles.form}>
-            <h2>2. Login as Admin</h2>
-            <input type="text" placeholder="Username" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} required className={styles.input} />
-            <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className={styles.input} />
-            <button type="submit" className={styles.button}>Login</button>
-          </form>
-
-          <form onSubmit={handleCreatePost} className={styles.form}>
-            <h2>3. Create New Post (Requires Login)</h2>
-            <input type="text" placeholder="Post Title" value={postTitle} onChange={(e) => setPostTitle(e.target.value)} required className={styles.input} />
-            <textarea placeholder="Post Content" value={postContent} onChange={(e) => setPostContent(e.target.value)} required className={styles.textarea} />
-            <label htmlFor="file-upload" className={styles.uploadLabel}>Select Images</label>
-            <input id="file-upload" type="file" multiple onChange={handleFileSelect} style={{display: 'none'}} />
-            <div className={styles.previewContainer}>
-              {selectedFiles.map((filePreview, index) => {
-                const isUploaded = uploadedImages.some(img => img.fileName === filePreview.file.name);
-                return (
-                  <div key={index} className={styles.previewItem}>
-                    <img src={filePreview.previewUrl} alt="Preview" className={styles.previewImage} />
-                    <span>{filePreview.file.name}</span>
-                    {!isUploaded ? (
-                      <button type="button" onClick={() => handleConfirmUpload(filePreview.file)}>Confirm Upload</button>
-                    ) : (
-                      <span className={styles.uploadedText}>✓ Uploaded</span>
-                    )}
-                  </div>
-                );
-              })}
+        {/* POSTS & COMMENTS (Column 2) */}
+        <div className={styles.apiSection}>
+          <h2>Posts & Comments</h2>
+          <div className={styles.formGrid}>
+            <input type="text" placeholder="Post Title" value={postTitle} onChange={e => setPostTitle(e.target.value)} className={styles.fullWidth} />
+            <textarea placeholder="Post Content" value={postContent} onChange={e => setPostContent(e.target.value)} className={styles.fullWidth} />
+            <div className={styles.fullWidth}>
+              <label>Primary Image: </label>
+              <input type="file" accept="image/*" onChange={e => setPrimaryImage(e.target.files ? e.target.files[0] : null)} />
             </div>
-            <button type="submit" className={styles.button}>Finalize & Create Post</button>
-          </form>
+            <div className={styles.fullWidth}>
+              <label>Gallery Files: </label>
+              <input type="file" multiple accept="image/*,video/*" onChange={e => setMediaFiles(e.target.files)} />
+            </div>
+            <button onClick={handleCreatePost} className={styles.button} style={{gridColumn: '1 / -1'}}>7. Create Post</button>
+            <hr style={{gridColumn: '1 / -1', border: 'none', borderTop: '1px solid #34495e'}}/>
+            <input type="text" placeholder="Post ID (for actions)" value={postId} onChange={(e) => setPostId(e.target.value)} className={styles.input} />
+            <button onClick={fetchSinglePost} className={styles.button}>9. Get Single Post</button>
+            <button onClick={handleDeletePost} className={styles.button}>11. Delete Post</button>
+            <button onClick={handleUpdatePost} className={styles.button}>10. Update Post</button>
+            <textarea placeholder="Comment Content" value={commentContent} onChange={e => setCommentContent(e.target.value)} className={styles.fullWidth} />
+            <button onClick={handleCreateComment} className={styles.button} style={{gridColumn: '1 / -1'}}>12. Create Comment</button>
+            <input type="text" placeholder="Comment ID to Delete" value={commentId} onChange={(e) => setCommentId(e.target.value)} className={styles.input} />
+            <button onClick={handleDeleteComment} className={styles.button}>13. Delete Comment</button>
+            <button onClick={fetchPosts} className={styles.button} style={{gridColumn: '1 / -1'}}>8. Get All Posts</button>
+          </div>
+        </div>
 
-          <form onSubmit={handleCreateComment} className={styles.form}>
-            <h2>Create New Comment</h2>
-            <input type="number" placeholder="Post ID to comment on" value={commentPostId} onChange={(e) => setCommentPostId(e.target.value)} required className={styles.input} />
-            <input type="text" placeholder="Your Name (Optional)" value={commentAuthorName} onChange={(e) => setCommentAuthorName(e.target.value)} className={styles.input} />
-            <textarea placeholder="Comment Content" value={commentContent} onChange={(e) => setCommentContent(e.target.value)} required className={styles.textarea} />
-            <button type="submit" className={styles.button}>Create Comment</button>
-          </form>
+        {/* DOCUMENT REQUESTS (Full Width) */}
+        <div className={`${styles.apiSection} ${styles.fullWidth}`}>
+          <h2>Document Requests</h2>
+          <div className={styles.formGrid}>
+            <input type="text" placeholder="Full Name" value={reqName} onChange={e => setReqName(e.target.value)} className={styles.input} />
+            <input type="text" placeholder="Purpose" value={reqPurpose} onChange={e => setReqPurpose(e.target.value)} className={styles.input} />
+            <select value={reqType} onChange={e => setReqType(e.target.value)} className={styles.fullWidth}>
+                <option>Barangay Certificate</option><option>Certificate of Indigency</option><option>Business Permit</option>
+            </select>
+            <button onClick={handleSubmitRequest} className={styles.button} style={{gridColumn: '1 / -1'}}>14. Submit Request</button>
+            <hr style={{gridColumn: '1 / -1', border: 'none', borderTop: '1px solid #34495e'}}/>
+            <input type="text" placeholder="Request Token" value={requestToken} onChange={e => setRequestToken(e.target.value)} className={styles.input} />
+            <button onClick={handleCheckRequestStatus} className={styles.button}>15. Check Status by Token</button>
+            <hr style={{gridColumn: '1 / -1', border: 'none', borderTop: '1px solid #34495e'}}/>
+            <input type="text" placeholder="Request ID (Admin)" value={requestId} onChange={e => setRequestId(e.target.value)} className={styles.input}/>
+            <select value={reqStatus} onChange={e => setReqStatus(e.target.value)} className={styles.input}>
+                <option>Pending</option><option>Approved</option><option>Rejected</option><option>Completed</option>
+            </select>
+            <button onClick={handleUpdateRequestStatus} className={styles.button} style={{gridColumn: '1 / -1'}}>17. Update Status (Admin)</button>
+            <button onClick={fetchAllRequests} className={styles.button} style={{gridColumn: '1 / -1'}}>16. Get All Requests (Auth Bypassed)</button>
+          </div>
+        </div>
 
-          <form onSubmit={handleSubmitDocumentRequest} className={styles.form}>
-            <h2>Submit Document Request</h2>
-            <input type="text" placeholder="Full Name" value={docFullName} onChange={(e) => setDocFullName(e.target.value)} required className={styles.input} />
-            <input type="text" placeholder="Request Type (e.g., Barangay Clearance)" value={docRequestType} onChange={(e) => setDocRequestType(e.target.value)} required className={styles.input} />
-            <textarea placeholder="Purpose" value={docPurpose} onChange={(e) => setDocPurpose(e.target.value)} required className={styles.textarea} />
-            <button type="submit" className={styles.button}>Submit Request</button>
-          </form>
+        {/* API RESPONSE (Full Width) */}
+        <div className={`${styles.apiSection} ${styles.fullWidth}`}>
+          <h2>API Response</h2>
+          <pre className={styles.response}>{JSON.stringify(apiResponse, null, 2)}</pre>
         </div>
         
-        <div className={styles.responseColumn}>
-          <h2>API Response</h2>
-          <div className={styles.responseBox}>
-            {apiResponse && <pre className={styles.pre}>{JSON.stringify(apiResponse, null, 2)}</pre>}
-            {apiError && <pre className={`${styles.pre} ${styles.errorText}`}>{apiError}</pre>}
-          </div>
-        </div>
       </div>
-
-      <hr style={{margin: '40px 0'}}/>
-
-      <div className={styles.postsSection}>
-        <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-          <h2>Live Posts Feed</h2>
-          <button onClick={handleFetchPosts} className={styles.button}>Refresh Posts</button>
-        </div>
-        {posts.length > 0 ? (
-          posts.map((post) => {
-            const sortedComments = [...post.comments].sort((a, b) => a.is_flagged - b.is_flagged);
-            return (
-              <div key={post.id} className={styles.post}>
-                <h3>{post.title} (ID: {post.id})</h3>
-                <p className={styles.postMeta}>by {post.author.username} on {new Date(post.created_at).toLocaleString()}</p>
-                <p className={styles.postContent}>{post.content}</p>
-                {post.images && post.images.length > 0 && (
-                  <div className={styles.imageContainer}>
-                    {post.images.map((image: any) => (
-                      <img key={image.id} src={image.url} alt="Post" className={styles.postImage} />
-                    ))}
-                  </div>
-                )}
-                <h4>Comments:</h4>
-                <div className={styles.commentsContainer}>
-                  {sortedComments.length > 0 ? (
-                    sortedComments.map((comment: any) => (
-                      <div key={comment.id} className={styles.comment}>
-                         <strong>{comment.author_name}:</strong>
-                         <p>{comment.content}</p>
-                         {comment.is_flagged && <span className={styles.flagged}> (Flagged for Review)</span>}
-                      </div>
-                    ))
-                  ) : (
-                    <p>No comments yet.</p>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <p>No posts found. Create one to see it here!</p>
-        )}
-      </div>
-      <hr style={{margin: '40px 0'}}/>
-
-      <div className={styles.postsSection}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-              <h2>Document Requests (Admin View)</h2>
-              <button onClick={handleFetchDocumentRequests} className={styles.button}>
-                  Fetch Document Requests
-              </button>
-          </div>
-          {documentRequests.length > 0 ? (
-              documentRequests.map((request) => (
-                  <div key={request.id} className={styles.post}>
-                      <h3>Request ID: {request.id}</h3>
-                      <p><strong>Name:</strong> {request.full_name}</p>
-                      <p><strong>Type:</strong> {request.request_type}</p>
-                      <p><strong>Purpose:</strong> {request.purpose}</p>
-                      <p><strong>Status:</strong> {request.status}</p>
-                      <p><strong>Submitted:</strong> {new Date(request.submitted_at).toLocaleString()}</p>
-                  </div>
-              ))
-          ) : (
-              <p>No document requests found or you are not logged in as an admin.</p>
-          )}
-      </div>
-
     </div>
   );
 };

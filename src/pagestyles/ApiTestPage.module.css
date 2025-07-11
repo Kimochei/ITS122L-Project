@@ -1,148 +1,165 @@
-.page {
-    padding: 20px;
+/* src/pagestyles/ApiTestPage.module.css */
+
+.pageContainer {
+    max-width: 900px; /* Sets a max width for the content */
+    margin: 0 auto;   /* Automatically centers the container horizontally */
+    padding: 2rem;
     font-family: sans-serif;
+    background-color: #242424;
+    color: #f0f0f0; 
 }
 
-.container {
-    display: flex;
-    gap: 40px;
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #e0e0e0;
 }
 
-.formColumn {
-    flex: 1;
-}
-
-.responseColumn {
-    flex: 1;
-}
-
-.form {
-    margin-bottom: 30px;
-    border: 1px solid #ccc;
-    padding: 20px;
+.apiSection {
+    background-color: #2c3e50;
+    border: 1px solid #34495e;
     border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem; /* Space between each section */
 }
 
-.input, .textarea {
-    display: block;
-    width: 95%;
+.apiSection h2 {
+    margin-top: 0;
+    color: #3498db;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 0.5rem;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr; /* A single column for simplicity */
+    gap: 1rem;
+}
+
+.input,
+.textarea,
+.select {
     padding: 10px;
-    margin-bottom: 10px;
     border-radius: 4px;
-    border: 1px solid #ccc;
+    border: 1px solid #4a6572;
+    background-color: #34495e;
+    color: #ffffff;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .button {
-    padding: 10px 20px;
+    background-color: #3498db;
+    color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
     border: none;
-    background: #007bff;
-    color: white;
+    padding: 12px;
     border-radius: 4px;
-    cursor: pointer;
+    text-align: center;
 }
 
-.responseBox {
-    background: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    min-height: 400px;
+.button:hover {
+    background-color: #2980b9;
 }
 
-.pre {
+.statusBar {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    color: #000000;
+}
+
+.response {
+    background-color: #1c1c1c;
+    border: 1px solid #333;
+    padding: 1rem;
     white-space: pre-wrap;
-    word-break: break-all;
-    color: black;
-}
-
-.errorText {
-    color: red;
-}
-
-.postsSection {
-    margin-top: 20px;
-}
-
-.post {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.postContent {
-    white-space: pre-wrap; /* Ensures line breaks in content are shown */
-}
-
-.commentsContainer {
-    margin-top: 10px;
-    padding-left: 20px;
-    border-left: 2px solid #eee;
-}
-
-.comment {
-    border-bottom: 1px solid #f0f0f0;
-    padding: 10px 0;
-}
-
-.comment p {
-    margin: 5px 0 0 0;
-}
-
-.flagged {
-    color: orange;
-    font-weight: bold;
-    font-size: 12px;
-}
-
-.postMeta {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: -10px;
-}
-
-.imageContainer {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 15px 0;
-}
-
-.postImage {
-    max-width: 200px;
-    max-height: 200px;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
-.uploadLabel {
-    display: inline-block;
-    padding: 10px 15px;
-    background-color: #6c757d;
-    color: white;
+    word-wrap: break-word;
+    max-height: 500px;
+    overflow-y: auto;
     border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 10px;
+    color: #e0e0e0;
 }
-.previewContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 15px 0;
+
+.postsDisplayArea {
+    background-color: #34495e;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    max-height: 600px;
+    overflow-y: auto;
 }
-.previewItem {
+
+.postItem {
+    background-color: #2c3e50;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border-left: 3px solid #3498db;
+}
+
+.commentsSection {
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed #4a6572;
+}
+
+.commentItem {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    font-size: 14px;
-}
-.previewImage {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-.uploadedText {
-    color: green;
-    font-weight: bold;
+    font-size: 0.9rem;
+    background: #34495e;
+    padding: 0.5rem;
+    border-radius: 3px;
+    margin: 0.25rem 0;
 }
 
+.deleteButton {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    line-height: 20px;
+    text-align: center;
+}
+
+.deletePostButton {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+.commentInput {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.commentInput input {
+    flex-grow: 1;
+    background: #2c3e50;
+    border: 1px solid #4a6572;
+    color: white;
+    padding: 8px;
+    border-radius: 3px;
+}
+
+.commentInput button {
+    background: #2ecc71;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+}
