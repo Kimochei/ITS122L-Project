@@ -1,0 +1,29 @@
+.footer {
+  width: 100%;
+  padding: 20px 0;
+  color: #c2c2c2;
+  border-top: 1px solid #495057;
+  text-align: center;
+  /* This prevents the footer from shrinking */
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.content p {
+  margin: 0;
+  font-size: 0.8rem;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.text {
+  opacity: 1;
+}
+
+/* --- Collapsed State --- */
+.footer.collapsed .text {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}

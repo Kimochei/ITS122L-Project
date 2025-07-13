@@ -1,0 +1,24 @@
+.adminLayout {
+  display: grid;
+  /* Use the CSS variable for the first column's width */
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100vh;
+  background-color: #242424;
+  /* Add transition for a smooth collapse effect on the grid */
+  transition: grid-template-columns 0.3s ease-in-out;
+}
+
+.leftColumn {
+  grid-column: 1 / 2;
+  background-color: #343a40;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Ensure it takes full height */
+}
+
+.mainContent {
+  grid-column: 2 / 3;
+  padding: 20px;
+  background-color: #f4f6f9;
+  overflow-y: auto;
+}

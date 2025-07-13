@@ -1,0 +1,58 @@
+.landingContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 3rem;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: #6c757d;
+  margin-bottom: 2rem;
+}
+
+.ctaButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #0d6efd;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.ctaButton:hover {
+  background-color: #0b5ed7;
+}
+
+.features {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  text-align: center;
+  flex-wrap: wrap; 
+}
+
+.feature {
+  flex-basis: 30%;
+  min-width: 250px; 
+}
+
+.feature h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}

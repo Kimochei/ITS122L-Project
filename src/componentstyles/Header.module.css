@@ -1,0 +1,52 @@
+.header {
+  grid-area: header;
+  background-color: #ffffff;
+  padding: 0 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  /* This will push content to the left and right if you add more items */
+  justify-content: space-between; 
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Adds space between the button and the title */
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Styling for the new home button */
+.homeLink {
+  text-decoration: none;
+}
+
+.homeButton {
+  /* Shape and Size */
+  width: 40px;
+  height: 40px;
+  border-radius: 8px; /* Slightly rounded square */
+  
+  /* Color and Font */
+  background-color: #0d6efd;
+  color: #ffffff;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+
+  /* Centering the text inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.homeButton:hover {
+  background-color: #0b5ed7;
+}
