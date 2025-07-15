@@ -16,27 +16,12 @@
   color: #0038A8;
 }
 
-.logoutButton {
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: background-color 0.2s;
-}
-
-.logoutButton:hover {
-  background-color: #c9302c;
-}
-
 .tableContainer {
   background-color: #FFFFFF;
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
 }
 
 .tableContainer h2 {
@@ -70,38 +55,151 @@
   background-color: #f1f3f5;
 }
 
-.status {
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 0.8rem;
-  text-transform: capitalize;
-  display: inline-block;
-}
-
-.status.pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status.approved {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status.rejected {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.status.completed {
-    background-color: #d1ecf1;
-    color: #0c5460;
-}
-
 .loadingContainer {
   text-align: center;
   padding: 50px;
   font-size: 1.5rem;
   color: #666;
+}
+
+.actionCell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.actionButton {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  opacity: 0.8;
+}
+
+.approve {
+  background-color: #28a745;
+}
+
+.reject {
+  background-color: #dc3545;
+}
+
+.complete {
+  background-color: #007bff;
+}
+
+.view {
+  background-color: #6c757d;
+  cursor: default;
+}
+
+.viewButtonContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.viewTooltip {
+  visibility: hidden;
+  opacity: 0;
+  width: 300px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 15px;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -150px;
+  transition: opacity 0.3s;
+}
+
+.viewButtonContainer:hover .viewTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.viewTooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.viewTooltip h4 {
+  margin-top: 0;
+  border-bottom: 1px solid #555;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.viewTooltip p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+.viewTooltip p strong {
+    color: #ccc;
+}
+
+.modalContent {
+  padding: 10px;
+}
+
+.modalContent h3 {
+  margin-top: 0;
+}
+
+.modalTextarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.modalConfirmButton {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #0038A8;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  cursor: pointer;
+  background-color: #e9ecef;
+}
+
+.statusIndicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.completedIndicator {
+  background-color: #28a745; /* Green */
+}
+
+.rejectedIndicator {
+  background-color: #dc3545; /* Red */
 }

@@ -103,7 +103,7 @@ class DocumentRequest(Base):
     document_type = Column(String, index=True, nullable=False)
     purpose = Column(String, nullable=False)
     request_token = Column(String, unique=True, index=True, nullable=False)
-    admin_message = Column(Text, nullable=True) 
+    admin_message = Column(Text, nullable=False, default='') 
     # Use the imported enum for the database column type
     status = Column(String, default="pending", nullable=False)
     

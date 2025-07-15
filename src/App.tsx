@@ -17,6 +17,7 @@ const AdminAnnouncements = () => <div><h2>Manage Announcements</h2></div>; // Pl
 const AdminComments = () => <div><h2>Manage Comments</h2></div>; // Placeholder
 const AdminLogs = () => <div><h2>Manage Activity Logs</h2></div>; // Placeholder
 import AdminHomePage from './pages/admin/AdminHomePage';
+import AdminRequestDetails from './pages/admin/AdminRequestDetails';
 
 // Other placeholders
 const Officials = () => <div>Barangay Officials Page</div>;
@@ -53,6 +54,7 @@ const routes = [
       { index: true, element: <AdminHomePage /> }, 
       { path: 'home', element: <AdminHomePage /> },
       { path: 'requests', element: <AdminDocumentRequests /> },
+      { path: 'requests/view/:requestId', element: <AdminRequestDetails /> },
       { path: 'announcements', element: <AdminAnnouncements /> },
       { path: 'comments', element: <AdminComments /> },
       { path: 'logs', element: <AdminLogs /> },

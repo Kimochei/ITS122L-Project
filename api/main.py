@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
 from typing import Optional
-
+                              
 
 from . import crud, models, schemas, security
 from .database import SessionLocal, engine
@@ -129,7 +129,6 @@ def login_for_access_token(
             detail="Admin account is not yet approved"
         )
 
-    # ▼▼▼ ADD THIS LINE TO LOG THE LOGIN ACTIVITY ▼▼▼
     crud.create_activity_log(db, user=user, action="USER_LOGIN")
 
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -303,11 +302,12 @@ class StatusUpdateRequest(BaseModel):
 
 @app.post("/document-requests/", response_model=schemas.DocumentRequestCreateResponse, tags=["Public Document Requests"])
 def create_document_request(
-    request: schemas.DocumentRequestCreate,
+    request: schemas.DocumentRequestCreate, 
     db: Session = Depends(get_db)
 ):
     request_token = secrets.token_hex(16).upper()
     
+    # We no longer need to specify admin_message here.
     db_request = models.DocumentRequest(
         requester_name=request.requester_name,
         requester_age=request.requester_age,
@@ -316,7 +316,7 @@ def create_document_request(
         document_type=request.document_type,
         purpose=request.purpose,
         request_token=request_token,
-        status="pending" 
+        status="pending"
     )
     
     db.add(db_request)
@@ -356,6 +356,14 @@ def update_request_status(
     db_request.admin_message = status_update.admin_message
     
     db.commit()
+
+    crud.create_activity_log(
+        db=db, 
+        user=current_admin, 
+        action="UPDATED_REQUEST_STATUS",
+        details=f"Admin '{current_admin.username}' set status of request ID {db_request.id} to '{status_update.status.value}'."
+    )
+    
     db.refresh(db_request)
     return db_request
 
@@ -369,6 +377,17 @@ def view_document_requests(
     """Views all submitted document requests, with optional filters for status and document_type."""
     return crud.get_document_requests(db, status=status, document_type=document_type)
 
+@app.get("/admin/requests/{request_id}", response_model=schemas.DocumentRequest, tags=["Admin Document Requests"])
+def view_single_document_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    current_admin: schemas.User = Depends(get_current_active_admin),
+):
+    """Retrieves a single document request by its ID (Admin Only)."""
+    db_request = crud.get_document_request_by_id(db, request_id=request_id)
+    if db_request is None:
+        raise HTTPException(status_code=404, detail="Document request not found")
+    return db_request
 
 # --- Audit Log Endpoint ---
 

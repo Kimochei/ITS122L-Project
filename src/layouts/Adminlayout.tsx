@@ -1,15 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/AdminLayout.module.css';
 import logo from '../assets/skonnect-logo-white.png';
 
 const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
@@ -18,16 +13,14 @@ const AdminLayout = () => {
 
   return (
     <div className={styles.layoutContainer}>
-      {/* Admin Sidebar */}
-      <div className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''}`}>
+      {/* The static sidebar */}
+      <div className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <img src={logo} alt="sKonnect Logo" className={styles.logo} />
-          {/* This button is now only for closing, positioned inside */}
-          <button onClick={toggleSidebar} className={styles.closeBtn}>×</button>
         </div>
         
         <div className={styles.navLinks}>
-          <NavLink to="/admin/home">Dashboard</NavLink>                                                  
+          <NavLink to="/admin/home">Dashboard</NavLink>
           <NavLink to="/admin/requests">Document Requests</NavLink>
           <NavLink to="/admin/announcements">Announcements</NavLink>
           <NavLink to="/admin/comments">Comments</NavLink>
@@ -41,15 +34,8 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      {/* The 'shifted' class now controls the margin */}
-      <main className={`${styles.mainContent} ${sidebarOpen ? styles.shifted : ''}`}>
-        {/* This button is now only for opening, stays in the content area */}
-        {!sidebarOpen && (
-          <button onClick={toggleSidebar} className={styles.openBtn}>
-            ›
-          </button>
-        )}
+      {/* The main content area */}
+      <main className={styles.mainContent}>
         <div className={styles.pageContent}>
           <Outlet />
         </div>

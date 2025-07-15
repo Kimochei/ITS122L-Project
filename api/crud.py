@@ -149,6 +149,10 @@ def get_document_requests(db: Session, status: Optional[str] = None, document_ty
         
     return query.order_by(models.DocumentRequest.created_at.desc()).all()
 
+def get_document_request_by_id(db: Session, request_id: int):
+    """Retrieves a single document request by its ID."""
+    return db.query(models.DocumentRequest).filter(models.DocumentRequest.id == request_id).first()
+
 # =================================
 #  Activity Log CRUD
 # =================================

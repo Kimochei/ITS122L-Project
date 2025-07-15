@@ -1,0 +1,87 @@
+.detailsContainer {
+  background-color: #FFFFFF;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eaecee;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.backButton {
+  background: none;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+}
+
+.requestInfo h2, .actions h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.infoItem {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.infoItem strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #495057;
+}
+
+.actions .formGroup {
+  margin-bottom: 20px;
+}
+
+.actions label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.actions select, .actions textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.updateButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #0038A8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}

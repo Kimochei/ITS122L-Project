@@ -1,32 +1,26 @@
 .layoutContainer {
   display: flex;
-  background-color: #f4f6f9;
   min-height: 100vh;
-  position: relative; /* Needed for positioning the open/close buttons */
+  background-color: #f4f6f9; /* Background for the content area */
 }
 
 .sidebar {
-  width: 260px;
-  background-color: #212529;
+  width: 260px; /* Fixed width */
+  background-color: #212529; /* Dark background */
   color: #f8f9fa;
   display: flex;
   flex-direction: column;
-  position: fixed;
-  height: 100%;
-  z-index: 1000;
-  transition: transform 0.3s ease-in-out;
-  transform: translateX(0); /* Sidebar is visible by default */
-}
-
-.sidebar:not(.open) {
-  transform: translateX(-100%); /* Slides the sidebar completely off-screen */
+  height: 100vh; /* Full height */
+  position: fixed; /* Fixed position on the left */
+  top: 0;
+  left: 0;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
 .sidebarHeader {
   padding: 20px;
-  background-color: rgba(0,0,0,0.2);
+  background-color: #212529;
   text-align: center;
-  position: relative; /* For positioning the close button */
 }
 
 .logo {
@@ -36,7 +30,7 @@
 
 .navLinks {
   padding: 15px 0;
-  flex-grow: 1;
+  flex-grow: 1; /* Pushes footer to the bottom */
 }
 
 .navLinks a {
@@ -47,7 +41,7 @@
   font-size: 1rem;
   border-left: 4px solid transparent;
   transition: all 0.2s ease;
-  white-space: nowrap; /* Prevents text from wrapping during animation */
+  white-space: nowrap;
 }
 
 .navLinks a:hover {
@@ -58,12 +52,11 @@
 .navLinks a.active {
   background-color: #0038A8;
   color: #ffffff;
-  border-left-color: #FCD116;
+  border-left-color: #FCD116; /* Yellow accent */
 }
 
 .sidebarFooter {
   padding: 20px;
-  white-space: nowrap;
 }
 
 .logoutBtn {
@@ -78,43 +71,10 @@
   font-weight: bold;
 }
 
-/* Main Content Area */
 .mainContent {
   flex-grow: 1;
+  margin-left: 260px; /* IMPORTANT: Creates space for the fixed sidebar */
   padding: 0;
-  transition: margin-left 0.3s ease-in-out;
-}
-
-.mainContent.shifted {
-  margin-left: 260px; /* Pushes content over when sidebar is open */
-}
-
-/* Buttons for toggling */
-.closeBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: #adb5bd;
-  font-size: 2rem;
-  cursor: pointer;
-}
-
-.openBtn {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  background: #fff;
-  border: 1px solid #ddd;
-  color: #333;
-  border-radius: 50%;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  font-size: 1.5rem;
-  z-index: 999;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .pageContent {

@@ -116,16 +116,6 @@ class DocumentRequestCreate(BaseModel):
     document_type: str
     purpose: str
 
-class DocumentRequest(BaseModel):
-    id: int
-    requester_name: str
-    request_token: str
-    status: RequestStatus
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
 class DocumentRequestCreateResponse(BaseModel):
     message: str
     request_token: str
@@ -133,15 +123,20 @@ class DocumentRequestCreateResponse(BaseModel):
 
 class DocumentStatusUpdate(BaseModel):
     status: RequestStatus
-    admin_message: Optional[str] = None
+    admin_message: str
 
 class DocumentRequest(BaseModel):
     id: int
     requester_name: str
-    admin_message: Optional[str] = None # 
+    requester_age: int
+    date_of_birth: str
+    address: str
+    document_type: str
+    purpose: str
+    request_token: str
     status: RequestStatus
+    admin_message: Optional[str] = None
     created_at: datetime
-    
     class Config:
         from_attributes = True
 
