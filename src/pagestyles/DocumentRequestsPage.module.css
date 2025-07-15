@@ -1,0 +1,112 @@
+.pageContainer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.header { /* ... existing styles ... */ }
+
+.formContainer {
+  background-color: #FFFFFF;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.backButton {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+/* Styles for the initial two-button view */
+.initialView {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.actionButton {
+  padding: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: 2px solid #0038A8;
+  background-color: #f8f9fa;
+  color: #0038A8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: #0038A8;
+  color: #FFFFFF;
+}
+
+/* Styles for showing the token after submission */
+.tokenDisplay {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #e9ecef;
+  border-radius: 8px;
+  text-align: center;
+}
+.tokenDisplay h4 {
+  margin: 0 0 10px 0;
+  color: #155724;
+}
+.tokenDisplay textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.1rem;
+  font-family: monospace;
+  text-align: center;
+  border: 1px dashed #ced4da;
+  background-color: #fff;
+  resize: none;
+  margin: 10px 0;
+}
+.copyButton {
+  border: none;
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Styles for showing the tracked request result */
+.trackedResult {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+.trackedResult h4 { margin: 0 0 15px 0; }
+.trackedResult p { margin: 5px 0; }
+.status {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #0038A8;
+}
+
+/* --- Other existing styles --- */
+.header h1 { font-size: 2.8rem; color: #0038A8; margin-bottom: 10px; text-align: center; }
+.header p { font-size: 1.2rem; color: #666; text-align: center; }
+.requestForm h2 { text-align: center; margin-top: 0; margin-bottom: 30px; color: #333; }
+.formGroup { margin-bottom: 25px; }
+.formGroup label { display: block; font-weight: 600; margin-bottom: 8px; color: #495057; }
+.formGroup input, .formGroup textarea, .formGroup select { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+.submitButton { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: bold; color: #FFFFFF; background-color: #0038A8; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s ease; }
+.submitButton:disabled { background-color: #6c757d; cursor: not-allowed; }
+.errorMessage, .statusMessage { text-align: center; margin-top: 20px; padding: 10px; border-radius: 6px; }
+.errorMessage { background-color: #f8d7da; color: #721c24; }
+.statusMessage { background-color: #e2e3e5; color: #383d41; }

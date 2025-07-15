@@ -1,0 +1,100 @@
+.signinContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 20px;
+}
+
+.signinForm {
+  background-color: #FFFFFF;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.signinForm h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  color: #333;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #FFFFFF;
+  background-color: #0038A8;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submitBtn:hover {
+  background-color: #002b82;
+}
+
+.errorMessage {
+  color: #d93025;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* For the "Create an account" link */
+.signupLink {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.signupLink a {
+  color: #0038A8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.signupLink a:hover {
+  text-decoration: underline;
+}
+
+.backLink {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  text-decoration: none;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.backLink:hover {
+  color: #212529;
+}

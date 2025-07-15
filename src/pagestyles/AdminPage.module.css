@@ -1,0 +1,107 @@
+.adminContainer {
+  padding: 20px 40px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #EAECEE;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #0038A8;
+}
+
+.logoutButton {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #c9302c;
+}
+
+.tableContainer {
+  background-color: #FFFFFF;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.tableContainer h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.requestsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.requestsTable th, .requestsTable td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #EAECEE;
+}
+
+.requestsTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.requestsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.requestsTable tr:hover {
+  background-color: #f1f3f5;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  display: inline-block;
+}
+
+.status.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status.approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status.completed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.5rem;
+  color: #666;
+}

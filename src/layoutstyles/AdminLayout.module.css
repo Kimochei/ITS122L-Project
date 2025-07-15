@@ -1,24 +1,122 @@
-.adminLayout {
-  display: grid;
-  /* Use the CSS variable for the first column's width */
-  grid-template-columns: var(--sidebar-width) 1fr;
-  height: 100vh;
-  background-color: #242424;
-  /* Add transition for a smooth collapse effect on the grid */
-  transition: grid-template-columns 0.3s ease-in-out;
+.layoutContainer {
+  display: flex;
+  background-color: #f4f6f9;
+  min-height: 100vh;
+  position: relative; /* Needed for positioning the open/close buttons */
 }
 
-.leftColumn {
-  grid-column: 1 / 2;
-  background-color: #343a40;
+.sidebar {
+  width: 260px;
+  background-color: #212529;
+  color: #f8f9fa;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Ensure it takes full height */
+  position: fixed;
+  height: 100%;
+  z-index: 1000;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(0); /* Sidebar is visible by default */
 }
 
-.mainContent {
-  grid-column: 2 / 3;
+.sidebar:not(.open) {
+  transform: translateX(-100%); /* Slides the sidebar completely off-screen */
+}
+
+.sidebarHeader {
   padding: 20px;
-  background-color: #f4f6f9;
-  overflow-y: auto;
+  background-color: rgba(0,0,0,0.2);
+  text-align: center;
+  position: relative; /* For positioning the close button */
+}
+
+.logo {
+  max-width: 150px;
+  height: auto;
+}
+
+.navLinks {
+  padding: 15px 0;
+  flex-grow: 1;
+}
+
+.navLinks a {
+  color: #adb5bd;
+  padding: 15px 25px;
+  text-decoration: none;
+  display: block;
+  font-size: 1rem;
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap; /* Prevents text from wrapping during animation */
+}
+
+.navLinks a:hover {
+  background-color: #343a40;
+  color: #ffffff;
+}
+
+.navLinks a.active {
+  background-color: #0038A8;
+  color: #ffffff;
+  border-left-color: #FCD116;
+}
+
+.sidebarFooter {
+  padding: 20px;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  width: 100%;
+  padding: 12px;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Main Content Area */
+.mainContent {
+  flex-grow: 1;
+  padding: 0;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.mainContent.shifted {
+  margin-left: 260px; /* Pushes content over when sidebar is open */
+}
+
+/* Buttons for toggling */
+.closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #adb5bd;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.openBtn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #333;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  z-index: 999;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.pageContent {
+  padding: 30px;
 }

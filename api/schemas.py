@@ -2,8 +2,6 @@ from pydantic import BaseModel, EmailStr, Field, computed_field # <-- FIX IS HER
 from datetime import datetime
 from typing import List, Optional
 from enum import Enum
-
-# =================================
 #  Enumerations
 # =================================
 
@@ -24,6 +22,7 @@ class MediaType(str, Enum):
 class UserBase(BaseModel):
     username: str
     email: EmailStr
+    display_name: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8)
@@ -103,19 +102,23 @@ class Post(PostBase):
 #  Document Request Schemas
 # =================================
 
-class DocumentRequestBase(BaseModel):
-    name: str = Field(..., example="Juan Dela Cruz")
-    request_type: str = Field(..., example="Barangay Certificate")
-    purpose: str = Field(..., example="For employment application")
+class RequestStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    COMPLETED = "completed"
 
-class DocumentRequestCreate(DocumentRequestBase):
-    pass
+class DocumentRequestCreate(BaseModel):
+    requester_name: str
+    requester_age: int
+    date_of_birth: str
+    address: str
+    document_type: str
+    purpose: str
 
-class DocumentRequestUpdate(BaseModel):
-    status: RequestStatus
-
-class DocumentRequest(DocumentRequestBase):
+class DocumentRequest(BaseModel):
     id: int
+    requester_name: str
     request_token: str
     status: RequestStatus
     created_at: datetime
@@ -127,6 +130,20 @@ class DocumentRequestCreateResponse(BaseModel):
     message: str
     request_token: str
     status: RequestStatus
+
+class DocumentStatusUpdate(BaseModel):
+    status: RequestStatus
+    admin_message: Optional[str] = None
+
+class DocumentRequest(BaseModel):
+    id: int
+    requester_name: str
+    admin_message: Optional[str] = None # 
+    status: RequestStatus
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 # =================================
 #  Activity Log Schemas

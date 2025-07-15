@@ -1,0 +1,96 @@
+/* --- At the top of the file --- */
+.layoutContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+/* ========================= */
+/* == NEW FOOTER STYLES == */
+/* ========================= */
+.footer {
+  background-color: #062b76; /* Blue Background */
+  color: #EAECEE; /* Light text for contrast */
+  padding: 40px 50px;
+  margin-top: auto;
+}
+
+.footerContent {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* 3-column layout */
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerLogoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logoPlaceholder {
+  width: 100px;
+  height: 100px;
+  background-color: rgba(255, 255, 255, 0.2); /* Placeholder circle */
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+
+.footerLogoSection h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #FFFFFF;
+}
+
+.footerInfo h4, .footerLinks h4 {
+  font-size: 1.1rem;
+  color: #FFFFFF;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #495057;
+}
+
+.footerInfo p {
+  margin: 10px 0;
+  color: #adb5bd;
+}
+
+.footerLinks a {
+  display: block;
+  margin-bottom: 10px;
+  color: #adb5bd;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+  color: #FFFFFF;
+}
+
+
+/* --- Other existing styles --- */
+/* ... a large portion of your other styles for sidebar, etc. will be here ... */
+
+.main {
+  flex-grow: 1;
+}
+
+/* (Make sure the rest of your styles for .sidebar, .openbtn, etc. are still here) */
+.sidebar { background-color: #FFFFFF; box-shadow: 0 0 20px rgba(0,0,0,0.15); height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; overflow: hidden; transition: 0.5s; padding: 0; display: flex; flex-direction: column; }
+.sidebarHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 15px; background-color: #EAECEE; position: relative; white-space: nowrap; }
+.logo { max-width: 140px; height: auto; }
+.closebtn { font-size: 24px; background: none; border: none; color: #606770; cursor: pointer; padding: 5px; }
+.navLinks { padding: 10px 0; white-space: nowrap; }
+.navLinks a { color: #212529; padding: 18px 30px; text-decoration: none; font-size: 18px; display: block; transition: background-color 0.2s; }
+.navLinks a:hover { background-color: #f0f2f5; }
+.navLinks a.active { color: #0038A8; font-weight: 600; }
+.sidebarFooter { margin-top: auto; padding: 25px; white-space: nowrap; }
+.signinBtn { background-color: #062b76; color: #FFFFFF; font-weight: bold; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; transition: background-color 0.3s; }
+.signinBtn:hover { background-color: #062b76; }
+.open { width: 250px; }
+.openbtn { font-size: 20px; cursor: pointer; background-color: #212529; color: white; padding: 10px 15px; border: none; position: fixed; top: 15px; left: 15px; z-index: 500; border-radius: 5px; }
+.openbtn:hover { background-color: #495057; }
+.content { margin-top: 60px; }

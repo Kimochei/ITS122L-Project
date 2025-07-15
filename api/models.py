@@ -5,12 +5,14 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
-    Enum as SQLAlchemyEnum,
+    Enum as SAEnum,
+    Text,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 from .schemas import RequestStatus, MediaType # Import the enums
+
 
 # =================================
 #  User & Activity Log Models
@@ -22,6 +24,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
+    display_name = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
     is_admin = Column(Boolean, default=True)
     is_approved = Column(Boolean, default=False)
@@ -68,7 +71,7 @@ class Media(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     url = Column(String, nullable=False)
-    media_type = Column(SQLAlchemyEnum(MediaType), nullable=False) # Uses the MediaType enum
+    media_type = Column(SAEnum(MediaType), nullable=False) # Uses the MediaType enum
     post_id = Column(Integer, ForeignKey("posts.id"))
 
     post = relationship("Post", back_populates="media")
@@ -93,14 +96,16 @@ class DocumentRequest(Base):
     __tablename__ = "document_requests"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    request_type = Column(String, index=True)
-    purpose = Column(String)
-    
+    requester_name = Column(String, index=True, nullable=False)
+    requester_age = Column(Integer, nullable=False)
+    date_of_birth = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    document_type = Column(String, index=True, nullable=False)
+    purpose = Column(String, nullable=False)
     request_token = Column(String, unique=True, index=True, nullable=False)
-    
-    # ▼▼▼ THIS IS THE CORRECTED LINE ▼▼▼
-    # Change SQLAlchemyEnum to String to store the status as plain text
-    status = Column(String, nullable=False, default=RequestStatus.PENDING.value) 
+    admin_message = Column(Text, nullable=True) 
+    # Use the imported enum for the database column type
+    status = Column(String, default="pending", nullable=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

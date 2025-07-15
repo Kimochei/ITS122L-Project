@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from . import models, schemas, security
+from typing import Optional
+
 
 # =================================
 #  User & Authentication CRUD
@@ -135,9 +137,17 @@ def create_document_request(db: Session, request: schemas.DocumentRequestCreate)
     db.refresh(db_request)
     return db_request
 
-def get_document_requests(db: Session):
-    """Retrieves all document requests."""
-    return db.query(models.DocumentRequest).order_by(models.DocumentRequest.created_at.desc()).all()
+def get_document_requests(db: Session, status: Optional[str] = None, document_type: Optional[str] = None):
+    """Retrieves all document requests, with optional filters."""
+    query = db.query(models.DocumentRequest)
+    
+    if status:
+        query = query.filter(models.DocumentRequest.status == status)
+    
+    if document_type:
+        query = query.filter(models.DocumentRequest.document_type == document_type)
+        
+    return query.order_by(models.DocumentRequest.created_at.desc()).all()
 
 # =================================
 #  Activity Log CRUD

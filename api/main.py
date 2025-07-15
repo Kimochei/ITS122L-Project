@@ -13,6 +13,8 @@ from jose import JWTError, jwt
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
+from typing import Optional
+
 
 from . import crud, models, schemas, security
 from .database import SessionLocal, engine
@@ -301,21 +303,29 @@ class StatusUpdateRequest(BaseModel):
 
 @app.post("/document-requests/", response_model=schemas.DocumentRequestCreateResponse, tags=["Public Document Requests"])
 def create_document_request(
-    request: schemas.DocumentRequestCreate, db: Session = Depends(get_db)
+    request: schemas.DocumentRequestCreate,
+    db: Session = Depends(get_db)
 ):
-    """Submits a new document request and returns a tracking token."""
     request_token = secrets.token_hex(16).upper()
+    
     db_request = models.DocumentRequest(
-        **request.model_dump(),
+        requester_name=request.requester_name,
+        requester_age=request.requester_age,
+        date_of_birth=request.date_of_birth,
+        address=request.address,
+        document_type=request.document_type,
+        purpose=request.purpose,
         request_token=request_token,
-        status=schemas.RequestStatus.PENDING
+        status="pending" 
     )
+    
     db.add(db_request)
     db.commit()
+    
     return {
         "message": "Request submitted successfully.",
         "request_token": request_token,
-        "status": schemas.RequestStatus.PENDING,
+        "status": "pending",
     }
 
 @app.get("/document-requests/status/{request_token}", response_model=schemas.DocumentRequest, tags=["Public Document Requests"])
@@ -331,29 +341,34 @@ def get_document_request_status(request_token: str, db: Session = Depends(get_db
 @app.patch("/admin/document-requests/{request_id}/status", response_model=schemas.DocumentRequest, tags=["Admin Document Requests"])
 def update_request_status(
     request_id: int,
-    status_update: StatusUpdateRequest,
+    status_update: schemas.DocumentStatusUpdate, # Use the new schema
     db: Session = Depends(get_db),
     current_admin: schemas.User = Depends(get_current_active_admin),
 ):
-    """Updates the status of a specific document request (Admin Only)."""
-    db_request = db.query(models.DocumentRequest).filter(
-        models.DocumentRequest.id == request_id
-    ).first()
+    """Updates the status and adds an optional message for a document request."""
+    db_request = db.query(models.DocumentRequest).filter(models.DocumentRequest.id == request_id).first()
+    
     if db_request is None:
         raise HTTPException(status_code=404, detail="Document request not found.")
     
+    # Update both status and the new message field
     db_request.status = status_update.status
+    db_request.admin_message = status_update.admin_message
+    
     db.commit()
     db.refresh(db_request)
     return db_request
 
+
 @app.get("/admin/requests/", response_model=List[schemas.DocumentRequest], tags=["Admin Document Requests"])
-def view_document_requests(db: Session = Depends(get_db)): # REMOVED the admin dependency
-    """
-    Views all submitted document requests.
-    (Admin Only - Auth Bypassed for Testing)
-    """
-    return crud.get_document_requests(db)
+def view_document_requests(
+    db: Session = Depends(get_db),
+    status: Optional[str] = None,
+    document_type: Optional[str] = None
+):
+    """Views all submitted document requests, with optional filters for status and document_type."""
+    return crud.get_document_requests(db, status=status, document_type=document_type)
+
 
 # --- Audit Log Endpoint ---
 
