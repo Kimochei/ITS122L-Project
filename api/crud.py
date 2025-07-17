@@ -1,37 +1,33 @@
-from sqlalchemy.orm import Session, joinedload
-from . import models, schemas, security
+from sqlalchemy.orm import Session
 from typing import Optional
+from . import models, schemas, security
+from supabase import create_client, Client
+import os
 
-
-# =================================
-#  User & Authentication CRUD
-# =================================
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME", "post-media")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_user(db: Session, user_id: int):
-    """Retrieves a single user by their ID."""
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 def get_user_by_username(db: Session, username: str):
-    """Retrieves a single user by their username."""
     return db.query(models.User).filter(models.User.username == username).first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    """Retrieves a list of all users with pagination."""
-    return db.query(models.User).offset(skip).limit(limit).all()
-
 def get_pending_approval_users(db: Session):
-    """Retrieves all users whose accounts are not yet approved."""
     return db.query(models.User).filter(models.User.is_approved == False).all()
 
 def count_users(db: Session) -> int:
-    """Counts the total number of users in the database."""
     return db.query(models.User).count()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    """Creates a new user with a hashed password."""
     hashed_password = security.get_password_hash(user.password)
     db_user = models.User(
-        username=user.username, email=user.email, hashed_password=hashed_password
+        username=user.username,
+        email=user.email,
+        display_name=user.display_name,
+        hashed_password=hashed_password
     )
     db.add(db_user)
     db.commit()
@@ -39,76 +35,67 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 def authenticate_user(db: Session, username: str, password: str):
-    """
-    Authenticates a user. Returns the user object if successful, otherwise None.
-    """
     user = get_user_by_username(db, username)
     if not user:
-        return None
+        return False
     if not security.verify_password(password, user.hashed_password):
-        return None
+        return False
     return user
 
-# =================================
-#  Post, Media, & Comment CRUD
-# =================================
-
-def get_post(db: Session, post_id: int):
-    """Retrieves a single post by its ID."""
-    return db.query(models.Post).filter(models.Post.id == post_id).first()
-
 def get_posts(db: Session, skip: int = 0, limit: int = 100):
-    """Retrieves a list of all posts with pagination."""
     return db.query(models.Post).order_by(models.Post.created_at.desc()).offset(skip).limit(limit).all()
 
+def get_post(db: Session, post_id: int):
+    return db.query(models.Post).filter(models.Post.id == post_id).first()
+
 def create_post(db: Session, post: schemas.PostCreate, user_id: int):
-    """Creates a new post and its associated media."""
     db_post = models.Post(
         title=post.title,
         content=post.content,
-        primary_image_url=post.primary_image_url,
         author_id=user_id,
+        primary_image_url=post.primary_image_url
     )
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
-
-    # Create Media objects from the provided URLs
     for media_item in post.media:
-        db_media = models.Media(
-            url=media_item.url,
-            media_type=media_item.media_type,
-            post_id=db_post.id
-        )
+        db_media = models.Media(**media_item.model_dump(), post_id=db_post.id)
         db.add(db_media)
-    
     db.commit()
     db.refresh(db_post)
     return db_post
 
 def update_post(db: Session, post_id: int, post_update: schemas.PostUpdate):
-    """Updates a post's title and content."""
     db_post = get_post(db, post_id=post_id)
-    if db_post:
+    if not db_post:
+        return None
+    if post_update.title is not None:
         db_post.title = post_update.title
+    if post_update.content is not None:
         db_post.content = post_update.content
-        db.commit()
-        db.refresh(db_post)
+    if post_update.primary_image_url is not None:
+        db_post.primary_image_url = post_update.primary_image_url
+    if post_update.media is not None:
+        for media_item in db_post.media:
+            db.delete(media_item)
+        for new_media_item in post_update.media:
+            db_media = models.Media(url=new_media_item.url, media_type=new_media_item.media_type, post_id=db_post.id)
+            db.add(db_media)
+    db.commit()
+    db.refresh(db_post)
     return db_post
 
 def delete_post(db: Session, post_id: int):
-    """Deletes a post from the database."""
     db_post = get_post(db, post_id=post_id)
     if db_post:
         db.delete(db_post)
         db.commit()
+    return db_post
 
 def get_comment(db: Session, comment_id: int):
-    """Retrieves a single comment by its ID."""
     return db.query(models.Comment).filter(models.Comment.id == comment_id).first()
 
 def create_comment(db: Session, comment: schemas.CommentCreate, post_id: int):
-    """Creates a new comment for a specific post."""
     db_comment = models.Comment(**comment.model_dump(), post_id=post_id)
     db.add(db_comment)
     db.commit()
@@ -116,68 +103,29 @@ def create_comment(db: Session, comment: schemas.CommentCreate, post_id: int):
     return db_comment
 
 def delete_comment(db: Session, comment_id: int):
-    """Deletes a comment from the database."""
-    db_comment = get_comment(db, comment_id)
+    db_comment = get_comment(db, comment_id=comment_id)
     if db_comment:
         db.delete(db_comment)
         db.commit()
-
-# =================================
-#  Document Request CRUD
-# =================================
-
-def create_document_request(db: Session, request: schemas.DocumentRequestCreate):
-    """
-    Creates a new document request. 
-    Note: The token is generated in the main.py endpoint.
-    """
-    db_request = models.DocumentRequest(**request.model_dump())
-    db.add(db_request)
-    db.commit()
-    db.refresh(db_request)
-    return db_request
+    return db_comment
 
 def get_document_requests(db: Session, status: Optional[str] = None, document_type: Optional[str] = None):
-    """Retrieves all document requests, with optional filters."""
     query = db.query(models.DocumentRequest)
-    
     if status:
         query = query.filter(models.DocumentRequest.status == status)
-    
     if document_type:
         query = query.filter(models.DocumentRequest.document_type == document_type)
-        
     return query.order_by(models.DocumentRequest.created_at.desc()).all()
 
 def get_document_request_by_id(db: Session, request_id: int):
-    """Retrieves a single document request by its ID."""
     return db.query(models.DocumentRequest).filter(models.DocumentRequest.id == request_id).first()
 
-# =================================
-#  Activity Log CRUD
-# =================================
-
 def create_activity_log(db: Session, user: schemas.User, action: str, details: str = None):
-    """Creates an activity log entry for an admin action."""
-    db_log = models.ActivityLog(
-        user_id=user.id,
-        username=user.username, # Now we explicitly save the username
-        action=action,
-        details=details
-    )
+    db_log = models.ActivityLog(user_id=user.id, action=action, details=details)
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
     return db_log
 
 def get_activity_logs(db: Session, skip: int = 0, limit: int = 100):
-    """Retrieves a list of all activity logs with pagination."""
-    # ▼▼▼ UPDATE THIS QUERY ▼▼▼
-    return (
-        db.query(models.ActivityLog)
-        .options(joinedload(models.ActivityLog.user)) # This line performs the JOIN
-        .order_by(models.ActivityLog.timestamp.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    return db.query(models.ActivityLog).order_by(models.ActivityLog.timestamp.desc()).offset(skip).limit(limit).all()

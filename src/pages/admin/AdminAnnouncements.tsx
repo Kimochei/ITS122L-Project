@@ -1,7 +1,189 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import styles from '../../pagestyles/AdminPage.module.css';
+import Modal from '../../components/Modal';
+import PostForm from '../../components/PostForm';
+import AdminPostPreview from '../../components/AdminPostPreview';
 
-const AdminAnnouncements = () => {
-  return <div><h2>Manage Announcements</h2><p>Here you will be able to create, edit, and delete posts.</p></div>;
+interface Media {
+  url: string;
+  media_type: string;
+}
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  author: { username: string };
+  created_at: string;
+  primary_image_url: string | null;
+  media: Media[];
+}
+
+const api = axios.create({ baseURL: 'http://127.0.0.1:8000' });
+
+const AdminAnnouncements: React.FC = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    try {
+      const response = await api.get('/posts/');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+      if ((error as any).response?.status === 401) {
+        localStorage.removeItem('accessToken');
+        navigate('/signin');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [navigate]);
+
+  const handleDelete = async (postId: number) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        await api.delete(`/admin/posts/${postId}`);
+        fetchPosts();
+      } catch (error) {
+        alert('Failed to delete post.');
+      }
+    }
+  };
+
+  const handleOpenFormModal = (post: Post | null) => {
+    setSelectedPost(post);
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenPreviewModal = (post: Post) => {
+    setSelectedPost(post);
+    setIsPreviewModalOpen(true);
+  };
+
+  const handleCloseModals = () => {
+    setIsFormModalOpen(false);
+    setIsPreviewModalOpen(false);
+    setSelectedPost(null);
+  };
+
+  const handleFormSubmit = async (
+    postData: { title: string; content: string },
+    newPrimaryImage: File | null,
+    newMediaFiles: File[],
+    currentMedia: { primary: string | null; gallery: Media[] }
+  ) => {
+    setIsSubmitting(true);
+    try {
+      let finalPrimaryUrl = currentMedia.primary;
+      if (newPrimaryImage) {
+        const urlRes = await api.post(`/admin/generate-upload-url?file_name=${newPrimaryImage.name}&post_folder=${selectedPost ? selectedPost.id : crypto.randomUUID()}`);
+        await axios.put(urlRes.data.signed_url, newPrimaryImage, { headers: { 'Content-Type': newPrimaryImage.type } });
+        finalPrimaryUrl = urlRes.data.public_url;
+      }
+
+      const newMediaItems: Media[] = [];
+      for (const file of newMediaFiles) {
+        const urlRes = await api.post(`/admin/generate-upload-url?file_name=${file.name}&post_folder=${selectedPost ? selectedPost.id : crypto.randomUUID()}`);
+        await axios.put(urlRes.data.signed_url, file, { headers: { 'Content-Type': file.type } });
+        newMediaItems.push({ url: urlRes.data.public_url, media_type: file.type.startsWith('video') ? 'video' : 'image' });
+      }
+
+      const finalMediaGallery = [...currentMedia.gallery, ...newMediaItems];
+      const finalPostData = {
+        ...postData,
+        primary_image_url: finalPrimaryUrl,
+        media: finalMediaGallery,
+      };
+
+      if (selectedPost) {
+        await api.put(`/admin/posts/${selectedPost.id}`, finalPostData);
+      } else {
+        await api.post('/admin/posts/', finalPostData);
+      }
+      
+      handleCloseModals();
+      fetchPosts();
+    } catch (error) {
+      alert('Failed to save post.');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <>
+      <div className={styles.adminContainer}>
+        <div className={styles.header}>
+          <h1>Manage Announcements</h1>
+          <button onClick={() => handleOpenFormModal(null)} className={styles.createButton}>Create New Post</button>
+        </div>
+        <div className={styles.postListContainer}>
+          {posts.length > 0 ? (
+            posts.map(post => (
+              <div key={post.id} className={styles.postCard}>
+                {post.primary_image_url ? (
+                  <img src={post.primary_image_url} alt={post.title} className={styles.postThumbnail} />
+                ) : (
+                  <div className={styles.thumbnailPlaceholder}>N/A</div>
+                )}
+                <div className={styles.postDetails}>
+                  <h3 className={styles.postTitle}>{post.title}</h3>
+                  <p className={styles.postMeta}>by {post.author.username} on {new Date(post.created_at).toLocaleDateString()}</p>
+                </div>
+                <div className={styles.postActions}>
+                  <button onClick={() => handleOpenPreviewModal(post)} className={`${styles.actionButton} ${styles.view}`}>Preview</button>
+                  <button onClick={() => handleOpenFormModal(post)} className={`${styles.actionButton} ${styles.edit}`}>Edit</button>
+                  <button onClick={() => handleDelete(post.id)} className={`${styles.actionButton} ${styles.reject}`}>Delete</button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className={styles.emptyRow}>
+              No announcements found. Click "Create New Post" to get started.
+            </div>
+          )}
+        </div>
+      </div>
+      <Modal isOpen={isFormModalOpen} onClose={handleCloseModals}>
+        <h2 className={styles.modalTitle}>{selectedPost ? 'Edit Post' : 'Create New Post'}</h2>
+        <PostForm
+          onSubmit={handleFormSubmit}
+          onCancel={handleCloseModals}
+          initialData={selectedPost || undefined}
+          isSubmitting={isSubmitting}
+        />
+      </Modal>
+      <AdminPostPreview 
+        post={selectedPost}
+        isOpen={isPreviewModalOpen}
+        onClose={handleCloseModals}
+      />
+    </>
+  );
 };
 
 export default AdminAnnouncements;

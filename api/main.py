@@ -24,7 +24,10 @@ from .settings import (
     SECRET_KEY,
     SUPABASE_URL,
     SUPABASE_KEY,
+    SUPABASE_BUCKET_NAME,
 )
+
+BUCKET_NAME = SUPABASE_BUCKET_NAME
 
 # Create all database tables (if they don't exist yet)
 models.Base.metadata.create_all(bind=engine)
@@ -191,11 +194,14 @@ def approve_admin(
 
 @app.post("/admin/generate-upload-url", tags=["Admin Posts"])
 def create_upload_url(
-    file_name: str, current_admin: schemas.User = Depends(get_current_active_admin)
+    file_name: str,
+    post_folder: str, # ADDED THIS PARAMETER
+    current_admin: schemas.User = Depends(get_current_active_admin)
 ):
-    """Generates a pre-signed URL for uploading media to Supabase."""
+    """Generates a pre-signed URL for uploading media to a post-specific folder."""
     try:
-        path = f"{current_admin.id}/{file_name}"
+        path = f"post/{post_folder}/{file_name}"
+
         signed_url_response = supabase.storage.from_(BUCKET_NAME).create_signed_upload_url(path)
         public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
         return {

@@ -1,23 +1,17 @@
-from pydantic import BaseModel, EmailStr, Field, computed_field # <-- FIX IS HERE
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import List, Optional
 from enum import Enum
-#  Enumerations
-# =================================
 
 class RequestStatus(str, Enum):
-    PENDING = "Pending"
-    APPROVED = "Approved"
-    REJECTED = "Rejected"
-    COMPLETED = "Completed"
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    COMPLETED = "completed"
 
 class MediaType(str, Enum):
     IMAGE = "image"
     VIDEO = "video"
-
-# =================================
-#  User & Authentication Schemas
-# =================================
 
 class UserBase(BaseModel):
     username: str
@@ -31,7 +25,6 @@ class User(UserBase):
     id: int
     is_admin: bool
     is_approved: bool
-
     class Config:
         from_attributes = True
 
@@ -41,10 +34,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
-
-# =================================
-#  Post, Media, & Comment Schemas
-# =================================
 
 class MediaBase(BaseModel):
     url: str
@@ -56,7 +45,6 @@ class MediaCreate(MediaBase):
 class Media(MediaBase):
     id: int
     post_id: int
-
     class Config:
         from_attributes = True
 
@@ -72,7 +60,6 @@ class Comment(CommentBase):
     created_at: datetime
     post_id: int
     is_inappropriate: bool = False
-
     class Config:
         from_attributes = True
 
@@ -85,7 +72,8 @@ class PostCreate(PostBase):
     media: List[MediaCreate] = []
 
 class PostUpdate(PostBase):
-    pass
+    primary_image_url: Optional[str] = None
+    media: Optional[List[MediaCreate]] = None
 
 class Post(PostBase):
     id: int
@@ -94,19 +82,8 @@ class Post(PostBase):
     primary_image_url: Optional[str] = None
     comments: List[Comment] = []
     media: List[Media] = []
-
     class Config:
         from_attributes = True
-
-# =================================
-#  Document Request Schemas
-# =================================
-
-class RequestStatus(str, Enum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    COMPLETED = "completed"
 
 class DocumentRequestCreate(BaseModel):
     requester_name: str
@@ -140,23 +117,12 @@ class DocumentRequest(BaseModel):
     class Config:
         from_attributes = True
 
-# =================================
-#  Activity Log Schemas
-# =================================
-
 class ActivityLog(BaseModel):
     id: int
     timestamp: datetime
     user_id: int
     action: str
     details: Optional[str] = None
-    
-    user: User 
-
-    @computed_field
-    @property
-    def username(self) -> str:
-        return self.user.username
-
+    user: User
     class Config:
         from_attributes = True

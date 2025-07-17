@@ -12,24 +12,24 @@ import AnnouncementsPage from './pages/AnnouncementsPage';
 import DocumentRequestsPage from './pages/DocumentRequestsPage';
 
 // Admin Pages
-import AdminDocumentRequests from './pages/admin/AdminDocumentRequests';
-const AdminAnnouncements = () => <div><h2>Manage Announcements</h2></div>; // Placeholder
-const AdminComments = () => <div><h2>Manage Comments</h2></div>; // Placeholder
-const AdminLogs = () => <div><h2>Manage Activity Logs</h2></div>; // Placeholder
 import AdminHomePage from './pages/admin/AdminHomePage';
+import AdminDocumentRequests from './pages/admin/AdminDocumentRequests';
 import AdminRequestDetails from './pages/admin/AdminRequestDetails';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 
-// Other placeholders
+// Placeholders for future pages
+const AdminComments = () => <div><h2>Manage Comments</h2></div>;
+const AdminLogs = () => <div><h2>Manage Activity Logs</h2></div>;
 const Officials = () => <div>Barangay Officials Page</div>;
 const About = () => <div>About Us Page</div>;
 const Contact = () => <div>Contact Us Page</div>;
 
-// ========= THE TEST PAGE IMPORT =========
+// Test Page Import
 import ApiTestPage from './pages/ApiTestPage';
 
-// Define all routes for the application
+// Define all application routes
 const routes = [
-  // --- Public Routes ---
+  // Public Routes
   {
     path: '/',
     element: <MainLayout />,
@@ -42,16 +42,16 @@ const routes = [
       { path: 'contact', element: <Contact /> },
     ],
   },
-  // --- Auth Routes ---
+  // Authentication Routes
   { path: '/signin', element: <SignInPage /> },
   { path: '/signup', element: <SignUpPage /> },
 
-  // --- Admin Routes ---
+  // Admin Routes
   {
     path: '/admin',
     element: <AdminLayout />,
     children: [
-      { index: true, element: <AdminHomePage /> }, 
+      { index: true, element: <Navigate to="/admin/home" replace /> },
       { path: 'home', element: <AdminHomePage /> },
       { path: 'requests', element: <AdminDocumentRequests /> },
       { path: 'requests/view/:requestId', element: <AdminRequestDetails /> },
@@ -62,8 +62,7 @@ const routes = [
   },
 ];
 
-// --- Conditionally add the API Test Page route ---
-// This is the critical part. It adds the /apitest route ONLY in development mode.
+// Conditionally add the API Test Page route for development
 if (import.meta.env.DEV) {
   routes.push({
     path: '/apitest',

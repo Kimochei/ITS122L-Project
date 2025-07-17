@@ -1,0 +1,209 @@
+.modalContent {
+  padding: 0; /* Remove padding to allow content to fill the modal */
+  width: 90%;  /* Use 90% of the screen width */
+  height: 90%; /* Use 90% of the screen height */
+  max-width: 1400px; /* Set a reasonable max-width */
+  background-color: #fff;
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden; /* This is key to prevent content from spilling out */
+}
+
+.statusMessage { 
+  width: 100%; 
+  text-align: center; 
+  font-size: 1.5rem; 
+  padding: 60px 20px; 
+  color: #6c757d; 
+}
+
+.postArticle { 
+  display: grid; 
+  grid-template-columns: 2fr 1fr; 
+  width: 100%; 
+  height: 100%; 
+}
+
+.mediaViewer { 
+  background-color: #000; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  overflow: hidden; 
+}
+
+.mainMedia { 
+  width: 100%; 
+  max-height: 100%; 
+  object-fit: contain; 
+}
+
+.postDetails { 
+  padding: 30px; 
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.postTitle { 
+  font-size: 1.8rem; 
+  margin: 0 0 5px 0; 
+}
+
+.postMeta { 
+  font-size: 0.9rem; 
+  color: #6c757d; 
+  margin-bottom: 20px; 
+}
+
+.postContent { 
+  font-size: 1rem; 
+  line-height: 1.6; 
+  flex-grow: 1; 
+}
+
+.gallery { 
+  margin-top: 20px; 
+}
+
+.galleryGrid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); 
+  gap: 10px; 
+}
+
+.galleryItem { 
+  cursor: pointer; 
+  border: 2px solid transparent; 
+  border-radius: 4px; 
+}
+
+.galleryItem.selected { 
+  border-color: #062b76; 
+}
+
+.galleryThumbnail { 
+  width: 100%; 
+  height: 70px; 
+  object-fit: cover; 
+  display: block; 
+}
+
+.videoThumbnailWrapper { 
+  position: relative; 
+  width: 100%; 
+  height: 70px; 
+  overflow: hidden; 
+  border-radius: 4px; 
+  background-color: #000;
+}
+
+.playIcon { 
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%); 
+  font-size: 24px; 
+  color: white; 
+  opacity: 0.8; 
+  pointer-events: none; 
+  text-shadow: 0 0 5px black; 
+}
+
+.commentsSection {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.commentsSection h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+}
+
+.commentList {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-right: -10px;
+}
+
+.comment {
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.comment:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.comment h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.comment p {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.comment small {
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
+.commentForm {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.commentForm input,
+.commentForm textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.commentForm input:focus,
+.commentForm textarea:focus {
+  outline: none;
+  border-color: #062b76;
+  box-shadow: 0 0 0 3px rgba(6, 43, 118, 0.1);
+}
+
+.commentForm textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.commentForm button {
+  align-self: flex-end;
+  padding: 8px 20px;
+  border: none;
+  background-color: #062b76;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.commentForm button:disabled {
+  background-color: #6c757d;
+}
+
+.commentForm button:hover:not(:disabled) {
+  background-color: #041e54;
+}

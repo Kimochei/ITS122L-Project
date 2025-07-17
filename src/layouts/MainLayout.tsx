@@ -16,22 +16,21 @@ const MainLayout = () => {
   };
 
   return (
-    <div className={styles.layoutContainer}>
+    <div className={styles.layoutContainer}> 
       <div className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''}`}>
         <div className={styles.sidebarHeader}>
-          <img src={logo} alt="sKonnect Logo" className={styles.logo} />
-          <button className={styles.closebtn} onClick={closeNav}>
-            &times;
-          </button>
+            <img src={logo} alt="sKonnect Logo" className={styles.logo} />
+            <button className={styles.closebtn} onClick={closeNav}>
+              &times;
+            </button>
         </div>
         <div className={styles.navLinks}>
-          <NavLink to="/" onClick={closeNav}>Home</NavLink>
-          <NavLink to="/announcements" onClick={closeNav}>Announcements</NavLink>
-          <NavLink to="/officials" onClick={closeNav}>Barangay Officials</NavLink>
-          {/* 👇 NEW LINK ADDED HERE 👇 */}
-          <NavLink to="/document-requests" onClick={closeNav}>Document Requests</NavLink>
-          <NavLink to="/about" onClick={closeNav}>About Us</NavLink>
-          <NavLink to="/contact" onClick={closeNav}>Contact Us</NavLink>
+            <NavLink to="/" onClick={closeNav}>Home</NavLink>
+            <NavLink to="/announcements" onClick={closeNav}>Announcements</NavLink>
+            <NavLink to="/officials" onClick={closeNav}>Barangay Officials</NavLink>
+            <NavLink to="/document-requests" onClick={closeNav}>Document Requests</NavLink>
+            <NavLink to="/about" onClick={closeNav}>About Us</NavLink>
+            <NavLink to="/contact" onClick={closeNav}>Contact Us</NavLink>
         </div>
         <div className={styles.sidebarFooter}>
           <button onClick={handleSignInClick} className={styles.signinBtn}>
@@ -40,12 +39,18 @@ const MainLayout = () => {
         </div>
       </div>
 
-      <div className={styles.main}>
-        <button className={styles.openbtn} onClick={openNav}>
-          &#9776;
-        </button>
-        <main className={styles.content}>
-          <Outlet />
+      <div className={styles.contentWrapper}>
+        <header className={styles.appHeader}>
+          <button className={styles.openbtn} onClick={openNav}>
+            ☰
+          </button>
+          <span className={styles.headerTitle}>sKonnect</span>
+        </header>
+
+        <main className={styles.main}>
+          <div className={styles.pageContent}>
+            <Outlet />
+          </div>
         </main>
       </div>
 

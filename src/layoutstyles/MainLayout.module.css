@@ -1,50 +1,167 @@
-/* --- At the top of the file --- */
 .layoutContainer {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
+.contentWrapper {
+  flex-grow: 1;
+}
 
-/* ========================= */
-/* == NEW FOOTER STYLES == */
-/* ========================= */
+/* --- New Header Styles --- */
+.appHeader {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  background-color: #062b76;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: 60px;
+  top: 0;
+
+  z-index: 900;
+}
+
+.headerTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #062b76;
+}
+
+.main {
+  flex-grow: 1;
+  padding: 20px;
+  padding-top: 80px; /* Pushes content below the fixed header */
+}
+
+.pageContent {
+    /* This can be used for page-specific content styling */
+}
+
+/* --- Sidebar Styles --- */
+.sidebar { 
+  background-color: #FFFFFF; 
+  box-shadow: 0 0 20px rgba(0,0,0,0.15); 
+  height: 100%; 
+  width: 0; 
+  position: fixed; 
+  z-index: 1000; 
+  top: 0; 
+  left: 0; 
+  overflow: hidden; 
+  transition: 0.5s; 
+  padding: 0; 
+  display: flex; 
+  flex-direction: column; 
+}
+.sidebar.open { 
+  width: 210px; 
+}
+.sidebarHeader { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 20px 15px; 
+  background-color: #EAECEE; 
+  position: relative; 
+  white-space: nowrap; 
+}
+.logo { 
+  max-width: 140px; 
+  height: auto; 
+}
+.closebtn { 
+  font-size: 24px; 
+  background: none; 
+  border: none; 
+  color: #606770; 
+  cursor: pointer; 
+  padding: 5px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+.navLinks { 
+  padding: 10px 0; 
+  white-space: nowrap; 
+  flex-grow: 1;
+}
+.navLinks a { 
+  color: #212529; 
+  padding: 18px 30px; 
+  text-decoration: none; 
+  font-size: 18px; 
+  display: block; 
+  transition: background-color 0.2s; 
+}
+.navLinks a:hover { 
+  background-color: #f0f2f5; 
+}
+.navLinks a.active { 
+  color: #062b76; 
+  font-weight: 600; 
+}
+.sidebarFooter { 
+  margin-top: auto; 
+  padding: 25px; 
+  white-space: nowrap; 
+}
+.signinBtn { 
+  background-color: #062b76; 
+  color: #FFFFFF; 
+  font-weight: bold; 
+  width: 100%; 
+  padding: 12px; 
+  border: none; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-size: 18px; 
+  transition: background-color 0.3s; 
+}
+.signinBtn:hover { 
+  background-color: #041e54; 
+}
+.openbtn { 
+  font-size: 1.5rem; 
+  cursor: pointer; 
+  background: none; 
+  border: none; 
+  color: #333; 
+  padding: 0; 
+  margin-right: 20px; 
+}
+
+/* --- Footer Styles --- */
 .footer {
-  background-color: #062b76; /* Blue Background */
-  color: #EAECEE; /* Light text for contrast */
+  background-color: #062b76;
+  color: #EAECEE;
   padding: 40px 50px;
   margin-top: auto;
 }
-
 .footerContent {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr; /* 3-column layout */
+  grid-template-columns: 1fr 2fr 1fr;
   gap: 40px;
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .footerLogoSection {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
-
 .logoPlaceholder {
   width: 100px;
   height: 100px;
-  background-color: rgba(255, 255, 255, 0.2); /* Placeholder circle */
+  background-color: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   margin-bottom: 15px;
 }
-
 .footerLogoSection h3 {
   margin: 0;
   font-size: 1.2rem;
   color: #FFFFFF;
 }
-
 .footerInfo h4, .footerLinks h4 {
   font-size: 1.1rem;
   color: #FFFFFF;
@@ -52,12 +169,10 @@
   padding-bottom: 10px;
   border-bottom: 1px solid #495057;
 }
-
 .footerInfo p {
   margin: 10px 0;
   color: #adb5bd;
 }
-
 .footerLinks a {
   display: block;
   margin-bottom: 10px;
@@ -65,7 +180,6 @@
   text-decoration: none;
   transition: color 0.2s;
 }
-
 .footerLinks a:hover {
   color: #FFFFFF;
 }

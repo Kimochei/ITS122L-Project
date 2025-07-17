@@ -1,58 +1,184 @@
-.landingContainer {
+/* Hero Banner Styles */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 100px 20px;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://via.placeholder.com/1500x500.png?text=Your+Barangay+Picture+Here') no-repeat center center/cover;
+  color: #ffffff;
+}
+.heroContent h1 {
+  font-size: 3.5rem;
+  margin: 0;
+}
+.heroContent p {
+  font-size: 1.5rem;
+  margin-top: 10px;
+  font-weight: 300;
+}
+
+/* Main Content Styles */
+.mainContent {
+  padding: 40px 20px;
+}
+
+/* Announcements Section Styles */
+.announcementsSection {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
-.hero {
-  text-align: center;
-  padding: 4rem 1rem;
-  background-color: #f8f9fa;
+.announcementsSection h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+}
+
+.announcementsGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+}
+
+/* Featured Post (Left Column) */
+.featuredPost {
+  text-decoration: none;
+  color: inherit;
+}
+.featuredImage {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 3rem;
+  margin-bottom: 15px;
 }
-
-.heroTitle {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.heroSubtitle {
-  font-size: 1.25rem;
-  color: #6c757d;
-  margin-bottom: 2rem;
-}
-
-.ctaButton {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #0d6efd;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.ctaButton:hover {
-  background-color: #0b5ed7;
-}
-
-.features {
-  display: flex;
-  justify-content: space-around;
-  gap: 2rem;
-  text-align: center;
-  flex-wrap: wrap; 
-}
-
-.feature {
-  flex-basis: 30%;
-  min-width: 250px; 
-}
-
-.feature h3 {
+.featuredPost h3 {
   font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin: 0 0 5px 0;
+}
+.featuredPost p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Post List (Right Column) */
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.postListItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  color: inherit;
+}
+.postListItem img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.postListItemContent h4 {
+  font-size: 1rem;
+  margin: 0 0 5px 0;
+  line-height: 1.3;
+}
+.postListItemContent p {
+  color: #666;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.modalLoading {
+  padding: 50px;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.postModalContent {
+  padding: 25px;
+  width: 90vw; /* Use 90% of the viewport width */
+  max-width: 900px; /* But no more than 900px wide */
+  height: 85vh; /* Use 85% of the viewport height */
+  max-height: 700px; /* But no more than 700px tall */
+  overflow-y: auto; /* Add a scrollbar if content overflows */
+  background-color: #fff; /* Ensure it has a solid background */
+}
+
+.postModalContent h2 {
+  font-size: 2.2rem;
+  margin: 0 0 5px 0;
+}
+
+.postModalMeta {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.postModalImage {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.postModalBody {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.postModalComments {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.comment {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.comment p {
+  margin: 0 0 8px 0;
+}
+
+.comment small {
+  color: #6c757d;
+}
+
+.gallery {
+  margin-top: 40px;
+}
+
+.gallery h3 {
+  border-top: 1px solid #dee2e6;
+  padding-top: 20px;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.mediaItem img,
+.galleryVideo {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
 }
