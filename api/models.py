@@ -34,7 +34,7 @@ class Media(Base):
     __tablename__ = "media"
     id = Column(Integer, primary_key=True, index=True)
     url = Column(String, nullable=False)
-    media_type = Column(String, nullable=False)
+    media_type = Column(SAEnum(MediaType), nullable=False)
     post_id = Column(Integer, ForeignKey("posts.id"))
     post = relationship("Post", back_populates="media")
 
