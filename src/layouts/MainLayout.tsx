@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-// Import Link to handle internal navigation smoothly
+// src/layouts/MainLayout.tsx
+import React, { useState, useEffect } from 'react';
 import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/MainLayout.module.css';
 import logo from '../assets/skonnect-logo.png';
+import PageLoader from '../components/PageLoader'; // Import the new loader component
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // NEW: Loading state
   const navigate = useNavigate();
 
   const openNav = () => setSidebarOpen(true);
@@ -16,8 +18,28 @@ const MainLayout = () => {
     navigate('/signin');
   };
 
+  // NEW: Simulate page loading
+  useEffect(() => {
+    // In a real app, this would be tied to actual data fetching or initial component mounts.
+    // For demonstration, we'll simulate a 1.5-second load time.
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer); // Cleanup timer
+  }, []);
+
+  // You might also reset loading state on navigation changes if pages fetch data
+  // useEffect(() => {
+  //   setIsLoading(true); // Set loading to true on route change
+  //   const timer = setTimeout(() => setIsLoading(false), 500); // Simulate load for new page
+  //   return () => clearTimeout(timer);
+  // }, [location.pathname]); // Listen to route changes
+
   return (
-    <div className={styles.layoutContainer}> 
+    <div className={styles.layoutContainer}>
+      {isLoading && <PageLoader />} {/* NEW: Conditionally render loader */}
+
       <div className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''}`}>
         <div className={styles.sidebarHeader}>
             <img src={logo} alt="sKonnect Logo" className={styles.logo} />
@@ -30,9 +52,8 @@ const MainLayout = () => {
             <NavLink to="/announcements" onClick={closeNav}>Announcements</NavLink>
             <NavLink to="/officials" onClick={closeNav}>Barangay Officials</NavLink>
             <NavLink to="/document-requests" onClick={closeNav}>Document Requests</NavLink>
-            
+
             <NavLink to="/about" onClick={closeNav}>About Us</NavLink>
-            <NavLink to="/contact" onClick={closeNav}>Contact Us</NavLink>
         </div>
         <div className={styles.sidebarFooter}>
           <button onClick={handleSignInClick} className={styles.signinBtn}>
@@ -50,38 +71,37 @@ const MainLayout = () => {
         </header>
 
         <main className={styles.main}>
-          <div className={styles.pageContent}>
-            <Outlet />
+          <div className={styles.innerContentWrapper}>
+            <div className={styles.pageContent}>
+              <Outlet />
+            </div>
           </div>
         </main>
-      </div>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerLogoSection}>
-            <div className={styles.logoPlaceholder}></div>
-            <h3>Barangay [Name]</h3>
+        <footer className={styles.footer}>
+          <div className={styles.footerContent}>
+            <div className={styles.footerLogoSection}>
+              <div className={styles.logoPlaceholder}></div>
+              <h3>Barangay [Name]</h3>
+            </div>
+            <div className={styles.footerInfo}>
+              <h4>Contact Information</h4>
+              <p>📞 Number (Position) </p>
+              <p>📞 Tel No. (Organization)</p>
+              <p>✉️ email (Email)</p>
+              <p>📍 (Specific Address), (Barangay), (Municipality), (Province), (Zip code)</p>
+            </div>
+            <div className={styles.footerLinks}>
+              <h4>Site Links</h4>
+              <Link to="/">Home</Link>
+              <Link to="/about">About</Link>
+              <Link to="/announcements">Announcements</Link>
+              <Link to="/officials">Officials</Link>
+              <Link to="/document-requests">Document Requests</Link>
+            </div>
           </div>
-          <div className={styles.footerInfo}>
-            <h4>Contact Information</h4>
-            <p>📞 Number (Position) </p>
-            <p>📞 Tel No. (Organization)</p>
-            <p>✉️ email (Email)</p>
-            <p>📍 (Specific Address), (Barangay), (Municipality), (Province), (Zip code)</p>
-          </div>
-          <div className={styles.footerLinks}>
-            <h4>Site Links</h4>
-            {/* --- UPDATED LINKS START HERE --- */}
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-            <Link to="/announcements">Announcements</Link>
-            <Link to="/officials">Officials</Link>
-            <Link to="/document-requests">Document Requests</Link>
-            <Link to="/contact">Contact</Link>
-            {/* --- UPDATED LINKS END HERE --- */}
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };

@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from '../componentstyles/PostModal.module.css';
-import Modal from './Modal';
+import Modal from './Modal'; // Assuming Modal.tsx is in the same directory
+import axios from 'axios';
 
 interface Comment {
   id: number;
   author_name: string;
   content: string;
   created_at: string;
+  is_inappropriate: boolean; // Corrected: Ensure this is part of the interface for filtering
 }
-interface Media { url: string; media_type: string; }
+interface Media {
+  url: string;
+  media_type: string;
+}
 interface FullPost {
   id: number;
   title: string;
@@ -19,14 +24,18 @@ interface FullPost {
   author: { username: string };
   created_at: string;
 }
-interface PostModalProps { postId: number | null; isOpen: boolean; onClose: () => void; }
+interface PostModalProps {
+  postId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
   const [post, setPost] = useState<FullPost | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [galleryMedia, setGalleryMedia] = useState<Media[]>([]);
-  
+
   const [authorName, setAuthorName] = useState('');
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -53,7 +62,7 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
         if (data.media) {
           allMedia.push(...data.media);
         }
-        
+
         setGalleryMedia(allMedia);
         if (allMedia.length > 0) {
           setSelectedMedia(allMedia[0]);
@@ -67,26 +76,24 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
 
     fetchPost();
   }, [postId, isOpen]);
-  
+
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !post) return;
     setIsSubmittingComment(true);
     try {
       const commentData = { author_name: authorName.trim() || "Anonymous", content: newComment };
-      const response = await fetch(`http://127.0.0.1:8000/posts/${post.id}/comments/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(commentData),
-      });
-      if (!response.ok) throw new Error('Failed to post comment.');
+      const response = await axios.post(`http://127.0.0.1:8000/posts/${post.id}/comments/`, commentData); // Using axios.post
+      if (!response.status.toString().startsWith('2')) throw new Error('Failed to post comment.'); // Check status code for axios
+
       setNewComment('');
       setAuthorName('');
-      // Refetch post to show the new comment
+      // Refetch post to show the new comment (including its inappropriate status)
       const postResponse = await fetch(`http://127.0.0.1:8000/posts/${postId}`);
       const updatedPost = await postResponse.json();
       setPost(updatedPost);
     } catch (error) {
+      console.error('Failed to submit your comment:', error); // Use console.error for better debugging
       alert('Failed to submit your comment.');
     } finally {
       setIsSubmittingComment(false);
@@ -97,25 +104,29 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
     if (!media) {
       return <div className={styles.mediaPlaceholder}>No Media Available</div>;
     }
-    
+
     // Using the URL as a `key` is crucial. It tells React to create a
     // new element when the src changes, avoiding loading issues.
     if (media.media_type.startsWith('video')) {
       return (
-        <video 
-          key={media.url} 
-          src={media.url} 
-          controls 
-          muted 
+        <video
+          key={media.url}
+          src={media.url}
+          controls
+          muted
           className={styles.mainMedia}
         >
           Your browser does not support the video tag.
         </video>
       );
     }
-    
+
     return <img key={media.url} src={media.url} alt="Selected media" className={styles.mainMedia} />;
   };
+
+  // Filter out inappropriate comments for display
+  const visibleComments = post?.comments ? post.comments.filter(comment => !comment.is_inappropriate) : [];
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} contentClass={styles.postModalContainer}>
@@ -128,6 +139,7 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
             <div className={styles.postDetails}>
               <h1 className={styles.postTitle}>{post.title}</h1>
               <p className={styles.postMeta}>By {post.author.username} on {new Date(post.created_at).toLocaleDateString()}</p>
+              {/* Ensure post content is safely rendered */}
               <div className={styles.postContent} dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
 
               {galleryMedia.length > 1 && (
@@ -149,17 +161,27 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
                   </div>
                 </div>
               )}
-              
+
               <div className={styles.commentsSection}>
-                 <h3>Comments ({post.comments.length})</h3>
-                 <div className={styles.commentList}>
-                    {post.comments.length > 0 ? (post.comments.map(c => <div key={c.id} className={styles.comment}><h4>{c.author_name}</h4><p>{c.content}</p><small>{new Date(c.created_at).toLocaleString()}</small></div>)) : <p>No comments yet.</p>}
-                 </div>
-                 <form onSubmit={handleCommentSubmit} className={styles.commentForm}>
-                    <input type="text" value={authorName} onChange={(e) => setAuthorName(e.target.value)} placeholder="Your Name (Optional)" />
-                    <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Write a comment..." rows={2} required />
-                    <button type="submit" disabled={isSubmittingComment}>{isSubmittingComment ? 'Posting...' : 'Post Comment'}</button>
-                 </form>
+                  <h3>Comments ({visibleComments.length})</h3> {/* Corrected: Use visibleComments.length */}
+                  <div className={styles.commentList}>
+                      {visibleComments.length > 0 ? ( // Corrected: Use visibleComments
+                          visibleComments.map(comment => (
+                              <div key={comment.id} className={styles.comment}>
+                                  <h4>{comment.author_name}</h4>
+                                  <p>{comment.content}</p>
+                                  <small>{new Date(comment.created_at).toLocaleString()}</small>
+                              </div>
+                          ))
+                      ) : (
+                          <p>No comments yet.</p>
+                      )}
+                  </div>
+                  <form onSubmit={handleCommentSubmit} className={styles.commentForm}>
+                      <input type="text" value={authorName} onChange={(e) => setAuthorName(e.target.value)} placeholder="Your Name (Optional)" />
+                      <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Write a comment..." rows={2} required />
+                      <button type="submit" disabled={isSubmittingComment}>{isSubmittingComment ? 'Posting...' : 'Post Comment'}</button>
+                  </form>
               </div>
             </div>
           </article>

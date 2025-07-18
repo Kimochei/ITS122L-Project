@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../pagestyles/LandingPage.module.css';
 import PostModal from '../components/PostModal'; // Import the new reusable component
+import headerImage from '../assets/Malitbog-header.png'; // Import the header image
 
 interface PostSummary {
   id: number;
@@ -22,23 +23,25 @@ const LandingPage = () => {
         if (!response.ok) throw new Error('Failed to fetch posts.');
         const data = await response.json();
         setPosts(data);
-      } catch (error) { console.error("Error fetching posts:", error); } 
+      } catch (error) { console.error("Error fetching posts:", error); }
       finally { setLoading(false); }
     };
     fetchPosts();
   }, []);
 
   const featuredPost = posts[0];
-  const otherPosts = posts.slice(1, 4); 
+  const otherPosts = posts.slice(1, 4);
 
   return (
     <>
       <header className={styles.hero}>
+        {/* Using the img tag for the header photo as requested */}
+        <img src={headerImage} alt="Barangay Malitbog Header" className={styles.heroImage} />
         <div className={styles.heroContent}>
-          <h1>Welcome to sKonnect</h1>
-          <p>Serving the community of (insert Barangay or Municipality)</p>
+          
         </div>
       </header>
+      <div className={styles.heroSpacer}></div> {/* NEW SPACER: Pushes content down as .hero is absolute */}
 
       <main className={styles.mainContent}>
         <div className={styles.announcementsSection}>
@@ -68,10 +71,10 @@ const LandingPage = () => {
       </main>
 
       {/* Use the new reusable component here */}
-      <PostModal 
-        postId={selectedPostId} 
-        isOpen={!!selectedPostId} 
-        onClose={() => setSelectedPostId(null)} 
+      <PostModal
+        postId={selectedPostId}
+        isOpen={!!selectedPostId}
+        onClose={() => setSelectedPostId(null)}
       />
     </>
   );

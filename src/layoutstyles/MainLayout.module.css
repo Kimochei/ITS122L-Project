@@ -13,7 +13,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  /* REMOVED: padding: 0 20px; to make the blue header full-width */
+  padding: 0;
   background-color: #062b76;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   height: 60px;
@@ -29,105 +30,114 @@
 
 .main {
   flex-grow: 1;
-  padding: 20px;
-  padding-top: 80px; /* Pushes content below the fixed header */
+  /* ENSURE: No horizontal padding here. The .innerContentWrapper will handle it. */
+  padding: 0; /* Changed from padding-top: 80px; to allow .innerContentWrapper to handle all padding */
+}
+
+/* NEW: This wrapper handles the max-width and padding for content inside .main */
+.innerContentWrapper {
+    max-width: 1200px; /* Adjust this value as needed for your content width */
+    margin: 0 auto; /* Centers the content wrapper horizontally */
+    padding: 20px; /* Adds internal padding to the content within this wrapper */
+    padding-top: 80px; /* Add the spacing for the fixed header here */
+    box-sizing: border-box; /* Ensures padding is included in the max-width */
 }
 
 .pageContent {
-    /* This can be used for page-specific content styling */
+    /* This can be used for page-specific content styling, but its width and padding are now managed by .innerContentWrapper */
 }
 
 /* --- Sidebar Styles --- */
-.sidebar { 
-  background-color: #FFFFFF; 
-  box-shadow: 0 0 20px rgba(0,0,0,0.15); 
-  height: 100%; 
-  width: 0; 
-  position: fixed; 
-  z-index: 1000; 
-  top: 0; 
-  left: 0; 
-  overflow: hidden; 
-  transition: 0.5s; 
-  padding: 0; 
-  display: flex; 
-  flex-direction: column; 
+.sidebar {
+  background-color: #FFFFFF;
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  transition: 0.5s;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
 }
-.sidebar.open { 
-  width: 210px; 
+.sidebar.open {
+  width: 210px;
 }
-.sidebarHeader { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 20px 15px; 
-  background-color: #EAECEE; 
-  position: relative; 
-  white-space: nowrap; 
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 15px;
+  background-color: #EAECEE;
+  position: relative;
+  white-space: nowrap;
 }
-.logo { 
-  max-width: 140px; 
-  height: auto; 
+.logo {
+  max-width: 140px;
+  height: auto;
 }
-.closebtn { 
-  font-size: 24px; 
-  background: none; 
-  border: none; 
-  color: #606770; 
-  cursor: pointer; 
+.closebtn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: #606770;
+  cursor: pointer;
   padding: 5px;
   position: absolute;
   top: 15px;
   right: 15px;
 }
-.navLinks { 
-  padding: 10px 0; 
-  white-space: nowrap; 
+.navLinks {
+  padding: 10px 0;
+  white-space: nowrap;
   flex-grow: 1;
 }
-.navLinks a { 
-  color: #212529; 
-  padding: 18px 30px; 
-  text-decoration: none; 
-  font-size: 18px; 
-  display: block; 
-  transition: background-color 0.2s; 
+.navLinks a {
+  color: #212529;
+  padding: 18px 30px;
+  text-decoration: none;
+  font-size: 18px;
+  display: block;
+  transition: background-color 0.2s;
 }
-.navLinks a:hover { 
-  background-color: #f0f2f5; 
+.navLinks a:hover {
+  background-color: #f0f2f5;
 }
-.navLinks a.active { 
-  color: #062b76; 
-  font-weight: 600; 
+.navLinks a.active {
+  color: #062b76;
+  font-weight: 600;
 }
-.sidebarFooter { 
-  margin-top: auto; 
-  padding: 25px; 
-  white-space: nowrap; 
+.sidebarFooter {
+  margin-top: auto;
+  padding: 25px;
+  white-space: nowrap;
 }
-.signinBtn { 
-  background-color: #062b76; 
-  color: #FFFFFF; 
-  font-weight: bold; 
-  width: 100%; 
-  padding: 12px; 
-  border: none; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  font-size: 18px; 
-  transition: background-color 0.3s; 
+.signinBtn {
+  background-color: #062b76;
+  color: #FFFFFF;
+  font-weight: bold;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.3s;
 }
-.signinBtn:hover { 
-  background-color: #041e54; 
+.signinBtn:hover {
+  background-color: #041e54;
 }
-.openbtn { 
-  font-size: 1.5rem; 
-  cursor: pointer; 
-  background: none; 
-  border: none; 
-  color: #333; 
-  padding: 0; 
-  margin-right: 20px; 
+.openbtn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #333;
+  padding: 0;
+  margin-right: 20px;
 }
 
 /* --- Footer Styles --- */
@@ -184,15 +194,6 @@
   color: #FFFFFF;
 }
 
-
-/* --- Other existing styles --- */
-/* ... a large portion of your other styles for sidebar, etc. will be here ... */
-
-.main {
-  flex-grow: 1;
-}
-
-/* (Make sure the rest of your styles for .sidebar, .openbtn, etc. are still here) */
 .sidebar { background-color: #FFFFFF; box-shadow: 0 0 20px rgba(0,0,0,0.15); height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; overflow: hidden; transition: 0.5s; padding: 0; display: flex; flex-direction: column; }
 .sidebarHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 15px; background-color: #EAECEE; position: relative; white-space: nowrap; }
 .logo { max-width: 140px; height: auto; }

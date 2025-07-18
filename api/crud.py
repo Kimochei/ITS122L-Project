@@ -1,13 +1,35 @@
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 from . import models, schemas, security
 from supabase import create_client, Client
 import os
+import re
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME", "post-media")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Load swear words from a file
+def load_swear_words(file_path="src/assets/swearwords.txt"):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return set(word.strip().lower() for word in f if word.strip())
+    except FileNotFoundError:
+        print(f"Warning: swearwords.txt not found at {file_path}. No profanity filtering will be applied.")
+        return set()
+
+# Global set of swear words
+BAD_WORDS = load_swear_words()
+
+def check_for_inappropriate_words(text: str) -> bool:
+    """Checks if a given text contains any inappropriate words."""
+    if not BAD_WORDS:
+        return False # No filtering if no bad words are loaded
+    
+    # Create a regex pattern to match whole words, case-insensitive
+    pattern = r'\b(?:' + '|'.join(re.escape(word) for word in BAD_WORDS) + r')\b'
+    return bool(re.search(pattern, text, re.IGNORECASE))
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -95,8 +117,17 @@ def delete_post(db: Session, post_id: int):
 def get_comment(db: Session, comment_id: int):
     return db.query(models.Comment).filter(models.Comment.id == comment_id).first()
 
+def get_comments(db: Session, post_id: Optional[int] = None, is_inappropriate: Optional[bool] = None, skip: int = 0, limit: int = 100):
+    query = db.query(models.Comment)
+    if post_id is not None:
+        query = query.filter(models.Comment.post_id == post_id)
+    if is_inappropriate is not None:
+        query = query.filter(models.Comment.is_inappropriate == is_inappropriate)
+    return query.order_by(models.Comment.created_at.desc()).offset(skip).limit(limit).all()
+
 def create_comment(db: Session, comment: schemas.CommentCreate, post_id: int):
-    db_comment = models.Comment(**comment.model_dump(), post_id=post_id)
+    is_inap = check_for_inappropriate_words(comment.content)
+    db_comment = models.Comment(**comment.model_dump(), post_id=post_id, is_inappropriate=is_inap)
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)
@@ -107,6 +138,14 @@ def delete_comment(db: Session, comment_id: int):
     if db_comment:
         db.delete(db_comment)
         db.commit()
+    return db_comment
+
+def mark_comment_inappropriate(db: Session, comment_id: int, flag: bool):
+    db_comment = get_comment(db, comment_id=comment_id)
+    if db_comment:
+        db_comment.is_inappropriate = flag
+        db.commit()
+        db.refresh(db_comment)
     return db_comment
 
 def get_document_requests(db: Session, status: Optional[str] = None, document_type: Optional[str] = None):
@@ -127,8 +166,29 @@ def create_activity_log(db: Session, user: schemas.User, action: str, details: s
     db.refresh(db_log)
     return db_log
 
-def get_activity_logs(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.ActivityLog).order_by(models.ActivityLog.timestamp.desc()).offset(skip).limit(limit).all()
+def get_activity_logs(db: Session, skip: int = 0, limit: int = 100, sort_by: str = "timestamp", sort_order: str = "desc"):
+    query = db.query(models.ActivityLog).join(models.User) # Join to access user details for sorting by user.display_name
+    
+    # Sorting logic
+    if sort_by == "timestamp":
+        if sort_order == "desc":
+            query = query.order_by(models.ActivityLog.timestamp.desc())
+        else:
+            query = query.order_by(models.ActivityLog.timestamp.asc())
+    elif sort_by == "user":
+        if sort_order == "desc":
+            query = query.order_by(models.User.display_name.desc())
+        else:
+            query = query.order_by(models.User.display_name.asc())
+    elif sort_by == "action":
+        if sort_order == "desc":
+            query = query.order_by(models.ActivityLog.action.desc())
+        else:
+            query = query.order_by(models.ActivityLog.action.asc())
+    else: # Default sort
+        query = query.order_by(models.ActivityLog.timestamp.desc())
+
+    return query.offset(skip).limit(limit).all()
 
 def get_official(db: Session, official_id: int):
     """Retrieve a single official by their ID."""

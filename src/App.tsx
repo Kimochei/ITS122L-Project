@@ -1,32 +1,48 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { lazy, Suspense } from 'react'; // Keep lazy and Suspense imports
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/Adminlayout';
 
-// Main Pages
-import LandingPage from './pages/LandingPage';
-import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
-import AnnouncementsPage from './pages/AnnouncementsPage';
-import DocumentRequestsPage from './pages/DocumentRequestsPage';
-import OfficialsPage from './pages/OfficialsPage'; // 
+// Main Pages (Lazy Loaded for better performance)
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const SignInPage = lazy(() => import('./pages/SignInPage'));
+const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+const AnnouncementsPage = lazy(() => import('./pages/AnnouncementsPage'));
+const DocumentRequestsPage = lazy(() => import('./pages/DocumentRequestsPage'));
+const OfficialsPage = lazy(() => import('./pages/OfficialsPage'));
 
-// Admin Pages
-import AdminHomePage from './pages/admin/AdminHomePage';
-import AdminDocumentRequests from './pages/admin/AdminDocumentRequests';
-import AdminRequestDetails from './pages/admin/AdminRequestDetails';
-import AdminAnnouncements from './pages/admin/AdminAnnouncements';
-import AdminOfficialsPage from './pages/admin/AdminOfficialsPage'; // 
+// Admin Pages (Lazy Loaded)
+const AdminHomePage = lazy(() => import('./pages/admin/AdminHomePage'));
+const AdminDocumentRequests = lazy(() => import('./pages/admin/AdminDocumentRequests'));
+const AdminRequestDetails = lazy(() => import('./pages/admin/AdminRequestDetails'));
+const AdminAnnouncements = lazy(() => import('./pages/admin/AdminAnnouncements'));
+const AdminOfficialsPage = lazy(() => import('./pages/admin/AdminOfficialsPage'));
+const AdminComments = lazy(() => import('./pages/admin/AdminComments'));
+const AdminLogs = lazy(() => import('./pages/admin/AdminLogs'));
 
-// Placeholders for future pages
-const AdminComments = () => <div><h2>Manage Comments</h2></div>;
-const AdminLogs = () => <div><h2>Manage Activity Logs</h2></div>;
-const About = () => <div>About Us Page</div>;
-const Contact = () => <div>Contact Us Page</div>;
+// Placeholders for future pages (NOT lazy loaded as they are defined inline)
+const About = () => <div><h2>About Us Page</h2><p>Information about the barangay will go here.</p></div>; // Keep as inline placeholder
+// REMOVED: const Contact = () => <div>Contact Us Page</div>; // This was removed in a previous step.
 
-// Test Page Import
-import ApiTestPage from './pages/ApiTestPage';
+// Test Page Import (Lazy Loaded)
+const ApiTestPage = lazy(() => import('./pages/ApiTestPage'));
+
+// A simple loading fallback component
+const LoadingFallback = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    fontSize: '1.5rem',
+    color: '#8B0000', // Dark Red
+    backgroundColor: '#f4f4f9'
+  }}>
+    Loading...
+  </div>
+);
 
 // Define all application routes
 const routes = [
@@ -35,17 +51,18 @@ const routes = [
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true, element: <LandingPage /> },
-      { path: 'announcements', element: <AnnouncementsPage /> },
-      { path: 'officials', element: <OfficialsPage /> }, // <-- UPDATED: Using the real component
-      { path: 'document-requests', element: <DocumentRequestsPage /> },
+      { index: true, element: <Suspense fallback={<LoadingFallback />}><LandingPage /></Suspense> },
+      { path: 'announcements', element: <Suspense fallback={<LoadingFallback />}><AnnouncementsPage /></Suspense> },
+      { path: 'officials', element: <Suspense fallback={<LoadingFallback />}><OfficialsPage /></Suspense> },
+      { path: 'document-requests', element: <Suspense fallback={<LoadingFallback />}><DocumentRequestsPage /></Suspense> },
+      // Corrected: About is an inline component, no Suspense needed around it
       { path: 'about', element: <About /> },
-      { path: 'contact', element: <Contact /> },
     ],
   },
-  // Authentication Routes
-  { path: '/signin', element: <SignInPage /> },
-  { path: '/signup', element: <SignUpPage /> },
+  // Authentication Routes (typically not lazy-loaded if they are entry points)
+  // Corrected: SignInPage and SignUpPage are now explicitly lazy-loaded too for consistency
+  { path: '/signin', element: <Suspense fallback={<LoadingFallback />}><SignInPage /></Suspense> },
+  { path: '/signup', element: <Suspense fallback={<LoadingFallback />}><SignUpPage /></Suspense> },
 
   // Admin Routes
   {
@@ -53,13 +70,13 @@ const routes = [
     element: <AdminLayout />,
     children: [
       { index: true, element: <Navigate to="/admin/home" replace /> },
-      { path: 'home', element: <AdminHomePage /> },
-      { path: 'requests', element: <AdminDocumentRequests /> },
-      { path: 'requests/view/:requestId', element: <AdminRequestDetails /> },
-      { path: 'announcements', element: <AdminAnnouncements /> },
-      { path: 'officials', element: <AdminOfficialsPage /> }, // 
-      { path: 'comments', element: <AdminComments /> },
-      { path: 'logs', element: <AdminLogs /> },
+      { path: 'home', element: <Suspense fallback={<LoadingFallback />}><AdminHomePage /></Suspense> },
+      { path: 'requests', element: <Suspense fallback={<LoadingFallback />}><AdminDocumentRequests /></Suspense> },
+      { path: 'requests/view/:requestId', element: <Suspense fallback={<LoadingFallback />}><AdminRequestDetails /></Suspense> },
+      { path: 'announcements', element: <Suspense fallback={<LoadingFallback />}><AdminAnnouncements /></Suspense> },
+      { path: 'officials', element: <Suspense fallback={<LoadingFallback />}><AdminOfficialsPage /></Suspense> },
+      { path: 'comments', element: <Suspense fallback={<LoadingFallback />}><AdminComments /></Suspense> },
+      { path: 'logs', element: <Suspense fallback={<LoadingFallback />}><AdminLogs /></Suspense> },
     ],
   },
 ];
@@ -68,7 +85,7 @@ const routes = [
 if (import.meta.env.DEV) {
   routes.push({
     path: '/apitest',
-    element: <ApiTestPage />,
+    element: <Suspense fallback={<LoadingFallback />}><ApiTestPage /></Suspense>,
   });
 }
 

@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import socket
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -353,6 +353,7 @@ def create_comment_for_post(
     db_post = crud.get_post(db, post_id=post_id)
     if db_post is None:
         raise HTTPException(status_code=404, detail="Post not found")
+    # The logic for setting is_inappropriate is now handled within crud.create_comment
     return crud.create_comment(db=db, comment=comment, post_id=post_id)
 
 # --- Document Request Endpoints ---
@@ -453,13 +454,18 @@ def view_single_document_request(
 
 @app.get("/admin/logs/", response_model=List[schemas.ActivityLog], tags=["Admin"])
 def read_activity_logs(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100), # Limiting to 20 per page as requested
+    sort_by: str = Query("timestamp", enum=["timestamp", "user", "action"]),
+    sort_order: str = Query("desc", enum=["asc", "desc"]),
     db: Session = Depends(get_db),
     current_admin: schemas.User = Depends(get_current_active_admin),
 ):
-    """Retrieves a list of all admin activity logs."""
-    return crud.get_activity_logs(db, skip=skip, limit=limit)
+    """
+    Retrieves a list of admin activity logs with pagination and sorting.
+    Sortable by timestamp, user (display name), and action.
+    """
+    return crud.get_activity_logs(db, skip=skip, limit=limit, sort_by=sort_by, sort_order=sort_order)
 
 # --- Barangay Officials Endpoint ---
 def get_current_admin(current_user: models.User = Depends(get_current_user)):
@@ -552,3 +558,41 @@ def upload_official_image(
     except Exception as e:
         print(f"Error uploading file: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/admin/comments/", response_model=List[schemas.Comment], tags=["Admin Comments"])
+def get_all_comments(
+    db: Session = Depends(get_db),
+    post_id: Optional[int] = Query(None, description="Filter comments by post ID"),
+    is_inappropriate: Optional[bool] = Query(None, description="Filter comments by inappropriate status"),
+    skip: int = 0,
+    limit: int = 100,
+    current_admin: schemas.User = Depends(get_current_active_admin),
+):
+    """Retrieve all comments, with optional filtering by post ID or inappropriate status."""
+    return crud.get_comments(db, post_id=post_id, is_inappropriate=is_inappropriate, skip=skip, limit=limit)
+
+@app.patch("/admin/comments/{comment_id}/flag", response_model=schemas.Comment, tags=["Admin Comments"])
+def flag_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_admin: schemas.User = Depends(get_current_active_admin),
+):
+    """Mark a comment as inappropriate."""
+    db_comment = crud.mark_comment_inappropriate(db, comment_id, True)
+    if not db_comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    crud.create_activity_log(db, user=current_admin, action="FLAGGED_COMMENT", details=f"Comment ID: {comment_id}")
+    return db_comment
+
+@app.patch("/admin/comments/{comment_id}/unflag", response_model=schemas.Comment, tags=["Admin Comments"])
+def unflag_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_admin: schemas.User = Depends(get_current_active_admin),
+):
+    """Unmark a comment as inappropriate."""
+    db_comment = crud.mark_comment_inappropriate(db, comment_id, False)
+    if not db_comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    crud.create_activity_log(db, user=current_admin, action="UNFLAGGED_COMMENT", details=f"Comment ID: {comment_id}")
+    return db_comment

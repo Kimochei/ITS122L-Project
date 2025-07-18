@@ -1,21 +1,158 @@
+/* Styles for the Admin Officials Page */
 .adminContainer {
   padding: 20px 40px;
+  background-color: #f4f7f6; /* A slightly off-white background for the page */
 }
 
-.header {
+.adminHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #EAECEE;
-  padding-bottom: 15px;
-  margin-bottom: 30px;
+  border-bottom: 2px solid #DEE2E6;
+  padding-bottom: 10px; /* Adjusted */
+  margin-bottom: 20px; /* Adjusted */
 }
 
-.header h1 {
+.adminHeader h1 {
   margin: 0;
-  color: #0038A8;
+  color: #0038A8; /* Official Blue */
+  font-size: 1.75rem;
 }
 
+.adminTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px; /* Adjusted */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.adminTable th, .adminTable td {
+    padding: 10px 15px; /* Adjusted: Smaller padding */
+    text-align: left;
+    border-bottom: 1px solid #EAECEE;
+    font-size: 0.85rem; /* Adjusted: Smaller font size */
+}
+
+.adminTable th {
+    background-color: #F8F9FA;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.8rem; /* Adjusted: Smaller font size */
+    letter-spacing: 0.5px;
+}
+
+.adminTable tr:hover {
+    background-color: #F1F3F5;
+}
+
+.adminTable tr:last-child td {
+    border-bottom: none;
+}
+
+.tableImage {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.actionCell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.editButton, .deleteButton, .addButton {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500; /* Adjusted for modern look */
+    color: white;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.editButton {
+    background-color: #ffc107; /* Amber */
+    color: #212529;
+}
+
+.deleteButton {
+    background-color: #dc3545; /* Red */
+}
+
+.addButton {
+    background-color: #0038A8; /* Using the official blue */
+}
+
+.editButton:hover, .deleteButton:hover, .addButton:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .375rem;
+}
+
+/* New styles for filtering and pagination */
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterGroup label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.filterGroup select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.paginationControls button {
+  background-color: #0038A8;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.paginationControls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.paginationControls button:hover:not(:disabled) {
+  background-color: #002b82;
+}
+
+/* Styles for the table (existing from original file, ensuring consistency) */
 .tableContainer {
   background-color: #FFFFFF;
   padding: 30px;
@@ -62,6 +199,7 @@
   color: #666;
 }
 
+/* Ensure these are present if they were for other tables using .actionCell */
 .actionCell {
   display: flex;
   gap: 10px;
@@ -237,6 +375,7 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
+  resize: vertical;
 }
 
 .formActions {

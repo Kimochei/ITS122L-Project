@@ -1,13 +1,49 @@
+/* src/pagestyles/LandingPage.module.css */
+
 /* Hero Banner Styles */
 .hero {
+  position: absolute; /* Take it out of normal flow */
+  top: 60px; /* Position below fixed appHeader (assuming appHeader is 60px tall) */
+  left: 0; /* Align to the left edge of the viewport */
+  width: 100vw; /* Span the full viewport width */
+  height: 400px; /* Fixed height for the header section (adjust as needed) */
+  overflow: hidden; /* Ensures image and content stay within bounds */
+  box-sizing: border-box; /* Include padding/border in element's total width/height */
+  color: #ffffff; /* Text color */
+
+  /* Use flexbox for text alignment within this absolute container */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 100px 40px;
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://via.placeholder.com/1500x500.png?text=Your+Barangay+Picture+Here') no-repeat center center/cover;
-  color: #ffffff;
+  align-items: center; /* Vertically center heroContent */
+  justify-content: flex-end; /* Push heroContent to the right */
+  padding-right: 5%; /* Add some spacing from the right edge for heroContent */
 }
+
+.heroSpacer { /* NEW SPACER: Matches .hero's height and position to push content down */
+  height: 400px; /* Match height of .hero */
+  margin-top: 60px; /* Match appHeader height to align content correctly below appHeader */
+  /* This spacer acts as a placeholder for .hero's space in the document flow */
+}
+
+.heroImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Fill the area, cropping if needed */
+  z-index: 1; /* Place the image behind the text content */
+}
+
+.heroContent {
+  position: relative; /* Keep it relative so it's affected by flexbox and z-index works */
+  z-index: 2; /* Place the content above the image */
+  max-width: 600px; /* Constrain text width for readability, adjust as needed */
+  text-align: left; /* Align text within its own block */
+  padding: 20px; /* Internal padding for the text block */
+  box-sizing: border-box; /* Include padding in max-width */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* For readability */
+}
+
 .heroContent h1 {
   font-size: 3.5rem;
   margin: 0;
@@ -20,7 +56,8 @@
 
 /* Main Content Styles */
 .mainContent {
-  padding: 40px 20px;
+  /* This will no longer need top padding for the appHeader as heroSpacer handles total header height */
+  padding: 40px 20px; /* Keep horizontal padding for content within the .innerContentWrapper */
 }
 
 /* Announcements Section Styles */
