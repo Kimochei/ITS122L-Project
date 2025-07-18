@@ -126,3 +126,26 @@ class ActivityLog(BaseModel):
     user: User
     class Config:
         from_attributes = True
+
+class OfficialBase(BaseModel):
+    name: str
+    position: str
+    photo_url: Optional[str] = None
+    bio: Optional[str] = None
+    contributions: Optional[str] = None
+
+class OfficialCreate(OfficialBase):
+    pass
+
+class OfficialUpdate(BaseModel):
+    name: Optional[str] = None
+    position: Optional[str] = None
+    photo_url: Optional[str] = None
+    bio: Optional[str] = None
+    contributions: Optional[str] = None
+
+class Official(OfficialBase):
+    id: int
+
+    class Config:
+        from_attributes = True

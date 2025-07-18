@@ -1,0 +1,89 @@
+.pageContainer {
+  padding: 40px 20px;
+  background-color: #f8f9fa; /* A light grey background for a clean look */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.header h1 {
+  font-size: 2.8rem;
+  color: #212529; /* A dark, almost black color for high contrast */
+  font-weight: 700;
+}
+
+.header p {
+  font-size: 1.2rem;
+  color: #6c757d; /* A muted grey for the sub-header */
+  margin-top: 10px;
+}
+
+.officialsGrid {
+  display: grid;
+  /* Creates a responsive grid that adjusts the number of columns based on screen width */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 35px;
+  max-width: 1400px;
+  margin: 0 auto; /* Center the grid on the page */
+}
+
+.officialCard {
+  background: #ffffff;
+  border: 1px solid #e9ecef; /* A very light border */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.officialCard:hover {
+  transform: translateY(-10px); /* Lifts the card on hover */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Adds a more prominent shadow on hover */
+}
+
+.cardImage {
+  width: 100%;
+  height: 300px;
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+  /* A subtle effect to make the image transition smoothly on hover */
+  transition: transform 0.3s ease;
+}
+
+.officialCard:hover .cardImage {
+  transform: scale(1.05); /* Slightly zooms into the image on hover */
+}
+
+.cardBody {
+  padding: 25px;
+}
+
+.cardName {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #343a40;
+  font-weight: 600;
+}
+
+.cardPosition {
+  margin: 8px 0 0;
+  color: #007bff; /* A nice blue to highlight the position */
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.error {
+  text-align: center;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 20px auto;
+}

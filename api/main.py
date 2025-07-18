@@ -406,3 +406,63 @@ def read_activity_logs(
 ):
     """Retrieves a list of all admin activity logs."""
     return crud.get_activity_logs(db, skip=skip, limit=limit)
+
+# --- Barangay Officials Endpoint ---
+def get_current_admin(current_user: models.User = Depends(get_current_user)):
+    """
+    Dependency to get the current user and verify they are an admin.
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have administrative privileges"
+        )
+    return current_user
+
+@app.get("/officials/", response_model=List[schemas.Official], tags=["Officials"])
+def read_officials(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """
+    Get a list of all barangay officials. This is a public endpoint.
+    """
+    officials = crud.get_officials(db, skip=skip, limit=limit)
+    return officials
+
+@app.post("/admin/officials/", response_model=schemas.Official, tags=["Admin - Officials"])
+def create_new_official(
+    official: schemas.OfficialCreate,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(get_current_admin) # Protect this route
+):
+    """
+    Create a new official. Requires admin privileges.
+    """
+    return crud.create_official(db=db, official=official)
+
+@app.put("/admin/officials/{official_id}", response_model=schemas.Official, tags=["Admin - Officials"])
+def update_existing_official(
+    official_id: int,
+    official_update: schemas.OfficialUpdate,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(get_current_admin) # Protect this route
+):
+    """
+    Update an official's details. Requires admin privileges.
+    """
+    db_official = crud.update_official(db, official_id, official_update)
+    if db_official is None:
+        raise HTTPException(status_code=404, detail="Official not found")
+    return db_official
+
+@app.delete("/admin/officials/{official_id}", response_model=schemas.Official, tags=["Admin - Officials"])
+def delete_existing_official(
+    official_id: int,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(get_current_admin) # Protect this route
+):
+    """
+    Delete an official. Requires admin privileges.
+    """
+    db_official = crud.delete_official(db, official_id)
+    if db_official is None:
+        raise HTTPException(status_code=404, detail="Official not found")
+    return db_official

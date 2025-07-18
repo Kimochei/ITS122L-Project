@@ -21,6 +21,7 @@ const AdminLayout = () => {
         
         <div className={styles.navLinks}>
           <NavLink to="/admin/home">Dashboard</NavLink>
+          <NavLink to="/admin/officials">Officials</NavLink>
           <NavLink to="/admin/requests">Document Requests</NavLink>
           <NavLink to="/admin/announcements">Announcements</NavLink>
           <NavLink to="/admin/comments">Comments</NavLink>

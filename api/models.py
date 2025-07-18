@@ -71,3 +71,13 @@ class ActivityLog(Base):
     action = Column(String)
     details = Column(String, nullable=True)
     user = relationship("User", back_populates="activity_logs")
+
+class Official(Base):
+    __tablename__ = "officials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    position = Column(String, nullable=False)
+    photo_url = Column(String, nullable=True)
+    bio = Column(Text, nullable=True) 
+    contributions = Column(Text, nullable=True) 

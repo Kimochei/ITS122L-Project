@@ -129,3 +129,38 @@ def create_activity_log(db: Session, user: schemas.User, action: str, details: s
 
 def get_activity_logs(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.ActivityLog).order_by(models.ActivityLog.timestamp.desc()).offset(skip).limit(limit).all()
+
+def get_official(db: Session, official_id: int):
+    """Retrieve a single official by their ID."""
+    return db.query(models.Official).filter(models.Official.id == official_id).first()
+
+def get_officials(db: Session, skip: int = 0, limit: int = 100):
+    """Retrieve a list of all officials."""
+    return db.query(models.Official).offset(skip).limit(limit).all()
+
+def create_official(db: Session, official: schemas.OfficialCreate):
+    """Create a new official record."""
+    db_official = models.Official(**official.dict())
+    db.add(db_official)
+    db.commit()
+    db.refresh(db_official)
+    return db_official
+
+def update_official(db: Session, official_id: int, official_update: schemas.OfficialUpdate):
+    """Update an existing official's details."""
+    db_official = get_official(db, official_id)
+    if db_official:
+        update_data = official_update.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_official, key, value)
+        db.commit()
+        db.refresh(db_official)
+    return db_official
+
+def delete_official(db: Session, official_id: int):
+    """Delete an official record."""
+    db_official = get_official(db, official_id)
+    if db_official:
+        db.delete(db_official)
+        db.commit()
+    return db_official

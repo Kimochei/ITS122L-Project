@@ -1,0 +1,106 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 2.5rem;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: #333;
+}
+
+.modalBody {
+  display: flex;
+  gap: 40px;
+}
+
+.modalImage {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 5px solid #e9ecef;
+  flex-shrink: 0; /* Prevents the image from shrinking */
+}
+
+.modalInfo {
+  flex: 1;
+  text-align: left;
+}
+
+.modalInfo h2 {
+  margin-top: 0;
+  font-size: 2.2rem;
+  color: #343a40;
+  font-weight: 700;
+}
+
+.modalInfo h3 {
+  margin-top: 0;
+  color: #007bff;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section h4 {
+  margin-bottom: 10px;
+  color: #495057;
+  border-bottom: 2px solid #f1f3f5;
+  padding-bottom: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.section p {
+  color: #6c757d;
+  line-height: 1.7;
+  font-size: 1rem;
+  white-space: pre-wrap; /* Preserves line breaks in the text */
+}
