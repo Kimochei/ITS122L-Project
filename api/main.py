@@ -1,4 +1,5 @@
 import os
+import uuid
 import secrets
 from datetime import timedelta
 from typing import List
@@ -6,7 +7,7 @@ from urllib.parse import urlparse
 import socket
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -195,27 +196,47 @@ def approve_admin(
 @app.post("/admin/generate-upload-url", tags=["Admin Posts"])
 def create_upload_url(
     file_name: str,
-    post_folder: str, # ADDED THIS PARAMETER
+    post_folder: str,
     current_admin: schemas.User = Depends(get_current_active_admin)
 ):
-    """Generates a pre-signed URL for uploading media to a post-specific folder."""
-    try:
-        path = f"post/{post_folder}/{file_name}"
+    """Generates a pre-signed URL for uploading media to a specific folder."""
+    
+    # --- DEBUGGING STARTS HERE ---
+    print("\n--- Generating Upload URL ---")
+    print(f"Received file_name: {file_name}")
+    print(f"Received post_folder: {post_folder}")
+    
+    # Let's check the bucket name from your .env file
+    print(f"Using BUCKET_NAME: '{BUCKET_NAME}'")
+    
+    if not BUCKET_NAME:
+        print("ERROR: BUCKET_NAME is not set in the environment!")
+        raise HTTPException(status_code=500, detail="Server configuration error: BUCKET_NAME is missing.")
+    # --- DEBUGGING ENDS HERE ---
 
-        signed_url_response = supabase.storage.from_(BUCKET_NAME).create_signed_upload_url(path)
+    try:
+        path = f"{post_folder}/{file_name}"
+        print(f"Constructed path for Supabase: {path}")
+
+        # This is the line that is likely failing.
+        print("Attempting to call supabase.storage.create_signed_upload_url...")
+        signed_url_response = supabase.storage.create_signed_upload_url(BUCKET_NAME, path)
+        print("Successfully generated signed URL.")
+        
         public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
+        
         return {
-            "signed_url": signed_url_response['signed_url'],
+            "signed_url": signed_url_response['signedUrl'],
             "public_url": public_url,
         }
     except Exception as e:
-        # Check if the bucket exists and create if it doesn't
-        try:
-            supabase.storage.get_bucket(BUCKET_NAME)
-        except Exception:
-            supabase.storage.create_bucket(BUCKET_NAME, options={"public": True})
-        raise HTTPException(status_code=500, detail=f"Could not generate URL: {e}")
-
+        # This will now print the EXACT error to your terminal
+        print("\n!!!!!!!!!! AN ERROR OCCURRED !!!!!!!!!!")
+        print(f"Error Type: {type(e)}")
+        print(f"Error Details: {e}")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        raise HTTPException(status_code=500, detail=f"Could not generate upload URL: {str(e)}")
+    
 @app.post("/admin/posts/", response_model=schemas.Post, status_code=status.HTTP_201_CREATED, tags=["Admin Posts"])
 def create_new_post(
     post: schemas.PostCreate,
@@ -275,6 +296,39 @@ def delete_a_comment(
         
     crud.delete_comment(db, comment_id=comment_id)
     return comment_to_delete
+
+@app.post("/admin/upload-announcement-image", tags=["Admin Announcements"])
+def upload_announcement_image(
+    file: UploadFile = File(...),
+    current_admin: schemas.User = Depends(get_current_active_admin)
+):
+    """
+    Accepts an image file, uploads it to Supabase with a unique name,
+    and returns the public URL.
+    """
+    try:
+        # Generate a unique filename to prevent overwriting files
+        file_extension = os.path.splitext(file.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        path = f"announcements/{unique_filename}"  # Save in an 'announcements' folder
+        
+        # Read the file content
+        file_content = file.file.read()
+
+        # Upload the file to your Supabase bucket
+        supabase.storage.from_(BUCKET_NAME).upload(
+            path=path,
+            file=file_content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        # Construct and return the public URL
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
+        return {"public_url": public_url}
+
+    except Exception as e:
+        print(f"ERROR in upload_announcement_image: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # --- Public Endpoints ---
 
@@ -466,3 +520,35 @@ def delete_existing_official(
     if db_official is None:
         raise HTTPException(status_code=404, detail="Official not found")
     return db_official
+
+@app.post("/admin/upload-official-image", tags=["Admin Posts"])
+def upload_official_image(
+    file: UploadFile = File(...),
+    current_admin: schemas.User = Depends(get_current_active_admin)
+):
+    """Uploads an image file to Supabase storage with a unique filename."""
+    try:
+        # Generate a unique filename to prevent overwriting files
+        file_extension = os.path.splitext(file.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        path = f"officials/{unique_filename}"
+        
+        # Read the file's content
+        file_content = file.file.read()
+
+        # Upload the file to your Supabase bucket
+        supabase.storage.from_(BUCKET_NAME).upload(
+            path=path,
+            file=file_content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        # Construct the public URL for the file
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
+        
+        # Return the URL in the response
+        return {"public_url": public_url}
+
+    except Exception as e:
+        print(f"Error uploading file: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

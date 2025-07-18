@@ -11,13 +11,13 @@
 /* --- New Header Styles --- */
 .appHeader {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   background-color: #062b76;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   height: 60px;
   top: 0;
-
   z-index: 900;
 }
 

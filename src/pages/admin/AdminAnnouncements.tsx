@@ -96,19 +96,32 @@ const AdminAnnouncements: React.FC = () => {
     setIsSubmitting(true);
     try {
       let finalPrimaryUrl = currentMedia.primary;
+
+      // --- UPLOAD PRIMARY IMAGE (THE CORRECT WAY) ---
       if (newPrimaryImage) {
-        const urlRes = await api.post(`/admin/generate-upload-url?file_name=${newPrimaryImage.name}&post_folder=${selectedPost ? selectedPost.id : crypto.randomUUID()}`);
-        await axios.put(urlRes.data.signed_url, newPrimaryImage, { headers: { 'Content-Type': newPrimaryImage.type } });
-        finalPrimaryUrl = urlRes.data.public_url;
+        const formData = new FormData();
+        formData.append('file', newPrimaryImage);
+
+        // Call our new, working backend endpoint
+        const uploadRes = await api.post('/admin/upload-announcement-image', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        finalPrimaryUrl = uploadRes.data.public_url;
       }
 
+      // --- UPLOAD GALLERY IMAGES (THE CORRECT WAY) ---
       const newMediaItems: Media[] = [];
       for (const file of newMediaFiles) {
-        const urlRes = await api.post(`/admin/generate-upload-url?file_name=${file.name}&post_folder=${selectedPost ? selectedPost.id : crypto.randomUUID()}`);
-        await axios.put(urlRes.data.signed_url, file, { headers: { 'Content-Type': file.type } });
-        newMediaItems.push({ url: urlRes.data.public_url, media_type: file.type.startsWith('video') ? 'video' : 'image' });
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const uploadRes = await api.post('/admin/upload-announcement-image', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        newMediaItems.push({ url: uploadRes.data.public_url, media_type: file.type.startsWith('video') ? 'video' : 'image' });
       }
 
+      // Combine all data for the final database submission
       const finalMediaGallery = [...currentMedia.gallery, ...newMediaItems];
       const finalPostData = {
         ...postData,
@@ -116,6 +129,7 @@ const AdminAnnouncements: React.FC = () => {
         media: finalMediaGallery,
       };
 
+      // Save the post data to the database
       if (selectedPost) {
         await api.put(`/admin/posts/${selectedPost.id}`, finalPostData);
       } else {
@@ -124,6 +138,7 @@ const AdminAnnouncements: React.FC = () => {
       
       handleCloseModals();
       fetchPosts();
+
     } catch (error) {
       alert('Failed to save post.');
       console.error(error);

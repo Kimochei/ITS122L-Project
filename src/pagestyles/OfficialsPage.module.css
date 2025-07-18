@@ -11,7 +11,7 @@
 
 .header h1 {
   font-size: 2.8rem;
-  color: #212529; /* A dark, almost black color for high contrast */
+  color: #0038A8; /* A dark, almost black color for high contrast */
   font-weight: 700;
 }
 
@@ -86,4 +86,32 @@
   font-size: 1.1rem;
   max-width: 600px;
   margin: 20px auto;
+}
+
+.categorySection {
+  margin-bottom: 50px; /* Adds space between categories */
+}
+
+.sectionHeader {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #343a40;
+  margin-bottom: 30px;
+  text-align: center; /* This centers the header text */
+  position: relative;
+  padding-bottom: 15px;
+  border-bottom: none; /* Remove the old full-width border */
+}
+
+/* This adds a small accent line below the centered header */
+.sectionHeader::after {
+  content: '';
+  position: absolute;
+  display: block;
+  width: 80px;
+  height: 3px;
+  background: #0038A8; /* Your theme's blue color */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }

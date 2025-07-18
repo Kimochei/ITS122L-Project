@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../pagestyles/AdminPage.module.css';
+import uploaderStyles from '../pagestyles/ImageUploader.module.css'; // Import the shared uploader styles
 import ImageUploader from './ImageUploader';
 
 interface Media { url: string; media_type: string; }
@@ -54,7 +55,12 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, onCancel, initialData, is
     }
   };
 
-  const handleRemovePrimary = () => setCurrentPrimary(null);
+  const handleRemovePrimary = () => {
+    setCurrentPrimary(null);
+    setNewPrimaryImage(null);
+    setPrimaryPreview(null);
+  };
+
   const handleRemoveGalleryItem = (urlToRemove: string) => {
     setCurrentGallery(currentGallery.filter(item => item.url !== urlToRemove));
   };
@@ -70,20 +76,22 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, onCancel, initialData, is
       <div className={styles.mediaManagementSection}>
         <div className={styles.mediaColumn}>
           <label>Primary Image</label>
-          {currentPrimary ? (
-            <div className={styles.mediaItemWrapper}>
-              <img src={currentPrimary} alt="Current primary" />
-              <button type="button" onClick={handleRemovePrimary} className={styles.deleteMediaButton}>×</button>
+          {(currentPrimary || primaryPreview) ? (
+            <div className={uploaderStyles.previewItem}>
+              <img src={primaryPreview || currentPrimary!} alt="Primary preview" />
+              <button type="button" onClick={handleRemovePrimary} className={uploaderStyles.deleteMediaButton}>×</button>
             </div>
-          ) : primaryPreview ? (
-             <div className={styles.mediaItemWrapper}>
-               <img src={primaryPreview} alt="New primary preview" />
-             </div>
-          ) : <p className={styles.noMediaText}>No primary image selected.</p>}
+          ) : (
+             <p className={styles.noMediaText}>No primary image selected.</p>
+          )}
         </div>
         <div className={styles.mediaColumn}>
           <label>Change/Upload Primary Image</label>
-          <input type="file" accept="image/*" className={styles.fileInput} onChange={handlePrimaryImageChange} />
+          {/* --- THIS IS THE STYLED PRIMARY UPLOAD BUTTON --- */}
+          <input type="file" accept="image/*" id="primary-image-upload" className={uploaderStyles.fileInput} onChange={handlePrimaryImageChange} />
+          <label htmlFor="primary-image-upload" className={uploaderStyles.uploadBox}>
+            Choose Primary Image
+          </label>
         </div>
       </div>
       
@@ -91,13 +99,13 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, onCancel, initialData, is
         <div className={styles.mediaColumn}>
           <label>Current Gallery</label>
           {currentGallery.length > 0 ? (
-            <div className={styles.currentGallery}>
+            <div className={uploaderStyles.currentGallery}>
               {currentGallery.map((item, index) => (
-                <div key={index} className={styles.mediaItemWrapper}>
+                <div key={index} className={uploaderStyles.mediaItemWrapper}>
                   {item.media_type.startsWith('video') ? (
-                    <><video src={`${item.url}#t=0.1`} preload="metadata" muted playsInline></video><div className={styles.playIconOverlay}>▶</div></>
+                    <video src={`${item.url}#t=0.1`} preload="metadata" muted playsInline></video>
                   ) : <img src={item.url} alt={`Item ${index}`} />}
-                  <button type="button" onClick={() => handleRemoveGalleryItem(item.url)} className={styles.deleteMediaButton}>×</button>
+                  <button type="button" onClick={() => handleRemoveGalleryItem(item.url)} className={uploaderStyles.deleteMediaButton}>×</button>
                 </div>
               ))}
             </div>
@@ -105,6 +113,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, onCancel, initialData, is
         </div>
         <div className={styles.mediaColumn}>
           <label>Add New Media to Gallery</label>
+          {/* This now correctly uses the styled ImageUploader */}
           <ImageUploader files={newMediaFiles} onFilesChange={setNewMediaFiles} />
         </div>
       </div>

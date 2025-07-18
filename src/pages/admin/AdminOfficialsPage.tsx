@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import OfficialFormModal from '../../components/OfficialFormModal';
+import axios from 'axios';
 import styles from '../../pagestyles/AdminPage.module.css';
+import OfficialFormModal from '../../components/OfficialFormModal';
 
+// Define the Official interface with an optional ID
 interface Official {
-  id: number;
+  id?: number;
   name: string;
   position: string;
   photo_url: string;
@@ -11,94 +13,153 @@ interface Official {
   contributions: string;
 }
 
+// Create an Axios instance to automatically handle the token
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000',
+});
+
+// Add a request interceptor to include the auth token in all requests
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 const AdminOfficialsPage: React.FC = () => {
   const [officials, setOfficials] = useState<Official[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOfficial, setEditingOfficial] = useState<Official | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchOfficials = useCallback(async () => {
     try {
-      const response = await fetch('/officials/');
-      if (!response.ok) throw new Error('Failed to fetch officials');
-      const data = await response.json();
-      setOfficials(data);
+      setIsLoading(true);
+      const response = await api.get('/officials/');
+      setOfficials(response.data);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError('Failed to fetch officials. Please try again later.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchOfficials(); }, [fetchOfficials]);
+  useEffect(() => {
+    fetchOfficials();
+  }, [fetchOfficials]);
 
-  const handleAdd = () => { setEditingOfficial(null); setIsModalOpen(true); };
-  const handleEdit = (official: Official) => { setEditingOfficial(official); setIsModalOpen(true); };
-  const handleCloseModal = () => { setIsModalOpen(false); setEditingOfficial(null); };
-
-  const handleSubmit = async (officialData: Omit<Official, 'id'> & { id?: number }) => {
-    const token = localStorage.getItem('token');
-    const method = officialData.id ? 'PUT' : 'POST';
-    const url = officialData.id ? `/admin/officials/${officialData.id}` : '/admin/officials/';
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(officialData),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to save official');
-      }
-      handleCloseModal();
-      fetchOfficials();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    }
+  const handleAddClick = () => {
+    setEditingOfficial(null);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleEditClick = (official: Official) => {
+    setEditingOfficial(official);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this official?')) {
-      const token = localStorage.getItem('token');
       try {
-        const response = await fetch(`/admin/officials/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || 'Failed to delete official');
-        }
+        await api.delete(`/admin/officials/${id}`);
         fetchOfficials();
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError('Failed to delete official.');
+        console.error(err);
       }
     }
   };
+
+  const handleFormSubmit = async (officialData: Official, imageFile: File | null) => {
+    try {
+      let finalPhotoUrl = officialData.photo_url;
+
+      // --- This is the new, correct upload logic ---
+      if (imageFile) {
+        // Create a FormData object to send the file
+        const formData = new FormData();
+        formData.append('file', imageFile);
+
+        // Post the file to our new backend endpoint
+        const uploadResponse = await api.post('/admin/upload-official-image', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        // Get the public URL from the backend's response
+        finalPhotoUrl = uploadResponse.data.public_url;
+      }
+
+      // Create the final data payload for the official
+      const finalOfficialData = { ...officialData, photo_url: finalPhotoUrl };
+
+      // Save the official's data to the database (this part was always correct)
+      if (editingOfficial) {
+        await api.put(`/admin/officials/${editingOfficial.id}`, finalOfficialData);
+      } else {
+        await api.post('/admin/officials/', finalOfficialData);
+      }
+
+      // Close the modal and refresh the list
+      setIsModalOpen(false);
+      setEditingOfficial(null);
+      fetchOfficials();
+
+    } catch (err) {
+      setError('Failed to save official. Please check the data and try again.');
+      console.error(err);
+    }
+  };
+
+  if (isLoading) return <div>Loading officials...</div>;
 
   return (
     <div className={styles.adminContainer}>
       <div className={styles.adminHeader}>
         <h1>Manage Barangay Officials</h1>
-        <button onClick={handleAdd} className={styles.addButton}>Add New Official</button>
+        <button onClick={handleAddClick} className={styles.addButton}>Add New Official</button>
       </div>
-      {error && <p className={styles.error}>{error}</p>}
-      <table className={styles.adminTable}>
-        <thead><tr><th>Photo</th><th>Name</th><th>Position</th><th>Actions</th></tr></thead>
-        <tbody>
-          {officials.map((official) => (
-            <tr key={official.id}>
-              <td><img src={official.photo_url || 'https://placehold.co/100x100/EEE/31343C?text=No+Img'} alt={official.name} className={styles.tableImage} /></td>
-              <td>{official.name}</td>
-              <td>{official.position}</td>
-              <td>
-                <button onClick={() => handleEdit(official)} className={styles.editButton}>Edit</button>
-                <button onClick={() => handleDelete(official.id)} className={styles.deleteButton}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <OfficialFormModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmit} initialData={editingOfficial} />
+
+      {error && <div className={styles.error}>{error}</div>}
+
+      {/* --- THIS IS THE NEW CARD LAYOUT --- */}
+      <div className={styles.officialsListContainer}>
+        {officials.length > 0 ? officials.map(official => (
+          <div key={official.id} className={styles.officialCard}>
+            <img
+              src={official.photo_url || 'https://via.placeholder.com/80'}
+              alt={official.name}
+              className={styles.officialCardPhoto}
+            />
+            <div className={styles.officialCardDetails}>
+              <h3 className={styles.officialName}>{official.name}</h3>
+              <p className={styles.officialPosition}>{official.position}</p>
+            </div>
+            <div className={styles.officialCardActions}>
+                               <button onClick={() => handleEditClick(official)} className={`${styles.actionButton} ${styles.edit}`}>Edit</button>
+                              {official.id && <button onClick={() => handleDeleteClick(official.id!)} className={`${styles.actionButton} ${styles.reject}`}>Delete</button>}
+            </div>
+          </div>
+        )) : (
+          <div className={styles.officialCard}>
+            <p>No officials found.</p>
+          </div>
+        )}
+      </div>
+
+      {isModalOpen && (
+        <OfficialFormModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleFormSubmit}
+          initialData={editingOfficial}
+        />
+      )}
     </div>
   );
 };

@@ -1,0 +1,111 @@
+/* Styles for the Admin Officials Page */
+.adminContainer {
+  padding: 20px 40px;
+  background-color: #f4f7f6; /* A slightly off-white background for the page */
+}
+
+.adminHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #DEE2E6;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.adminHeader h1 {
+  margin: 0;
+  color: #0038A8; /* Official Blue */
+  font-size: 1.75rem;
+}
+
+.adminTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.adminTable th, .adminTable td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #EAECEE;
+}
+
+.adminTable th {
+    background-color: #F8F9FA;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.adminTable tr:hover {
+    background-color: #F1F3F5;
+}
+
+.adminTable tr:last-child td {
+    border-bottom: none;
+}
+
+.tableImage {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.actionCell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.editButton, .deleteButton, .addButton {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500; /* Adjusted for modern look */
+    color: white;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.editButton {
+    background-color: #ffc107; /* Amber */
+    color: #212529;
+}
+
+.deleteButton {
+    background-color: #dc3545; /* Red */
+}
+
+.addButton {
+    background-color: #0038A8; /* Using the official blue */
+}
+
+.editButton:hover, .deleteButton:hover, .addButton:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .375rem;
+}

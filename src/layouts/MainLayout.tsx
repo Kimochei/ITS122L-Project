@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+// Import Link to handle internal navigation smoothly
+import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/MainLayout.module.css';
 import logo from '../assets/skonnect-logo.png';
 
@@ -29,6 +30,7 @@ const MainLayout = () => {
             <NavLink to="/announcements" onClick={closeNav}>Announcements</NavLink>
             <NavLink to="/officials" onClick={closeNav}>Barangay Officials</NavLink>
             <NavLink to="/document-requests" onClick={closeNav}>Document Requests</NavLink>
+            
             <NavLink to="/about" onClick={closeNav}>About Us</NavLink>
             <NavLink to="/contact" onClick={closeNav}>Contact Us</NavLink>
         </div>
@@ -44,7 +46,7 @@ const MainLayout = () => {
           <button className={styles.openbtn} onClick={openNav}>
             ☰
           </button>
-          <span className={styles.headerTitle}>sKonnect</span>
+          <span className={styles.headerTitle}>sKonnect by Kim Miguel Sobrepena</span>
         </header>
 
         <main className={styles.main}>
@@ -69,10 +71,14 @@ const MainLayout = () => {
           </div>
           <div className={styles.footerLinks}>
             <h4>Site Links</h4>
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/announcements">Announcements</a>
-            <a href="/contact">Contact</a>
+            {/* --- UPDATED LINKS START HERE --- */}
+            <Link to="/">Home</Link>
+            <Link to="/about">About</Link>
+            <Link to="/announcements">Announcements</Link>
+            <Link to="/officials">Officials</Link>
+            <Link to="/document-requests">Document Requests</Link>
+            <Link to="/contact">Contact</Link>
+            {/* --- UPDATED LINKS END HERE --- */}
           </div>
         </div>
       </footer>

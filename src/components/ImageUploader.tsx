@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import styles from '../pagestyles/AdminPage.module.css'; // Reusing styles from AdminPage
+import React, { useCallback, useMemo, useEffect } from 'react';
+import styles from '../pagestyles/ImageUploader.module.css';
 
 interface ImageUploaderProps {
   files: File[];
@@ -7,9 +7,10 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ files, onFilesChange }) => {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    onFilesChange([...files, ...acceptedFiles]);
-  }, [files, onFilesChange]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files || []);
+    onFilesChange([...files, ...newFiles]);
+  };
 
   const handleRemoveFile = (indexToRemove: number) => {
     const updatedFiles = files.filter((_, index) => index !== indexToRemove);
@@ -21,18 +22,34 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ files, onFilesChange }) =
     name: file.name
   })), [files]);
 
+  useEffect(() => {
+    return () => {
+      previews.forEach(preview => URL.revokeObjectURL(preview.url));
+    };
+  }, [previews]);
+
   return (
     <div>
-      <input type="file" multiple accept="image/*,video/*" className={styles.fileInput} onChange={(e) => onFilesChange(Array.from(e.target.files || []))} />
+      <input
+        type="file"
+        multiple
+        accept="image/*,video/*"
+        className={styles.fileInput}
+        id="gallery-file-input"
+        onChange={handleFileChange}
+      />
       
+      <label htmlFor="gallery-file-input" className={styles.dropzone}>
+          <p>+ Add Media to Gallery</p>
+      </label>
+
       {previews.length > 0 && (
-        <div className={styles.currentGallery} style={{ marginTop: '10px' }}>
+        <div className={styles.currentGallery}>
           {previews.map((preview, index) => (
             <div key={preview.name + index} className={styles.mediaItemWrapper}>
               <img
                 src={preview.url}
                 alt={`Preview ${preview.name}`}
-                onLoad={() => { URL.revokeObjectURL(preview.url) }}
               />
               <button type="button" onClick={() => handleRemoveFile(index)} className={styles.deleteMediaButton}>×</button>
             </div>

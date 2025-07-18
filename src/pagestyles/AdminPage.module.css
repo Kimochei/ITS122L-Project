@@ -530,3 +530,102 @@
   pointer-events: none; /* Allows the delete button underneath to be clicked */
   text-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
+
+.addButton {
+    background-color: #0038A8; /* Official Blue */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.addButton:hover {
+  background-color: #002b82; /* Darker blue on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.adminHeader {
+  display: flex;
+  justify-content: space-between; /* Pushes title and button to opposite ends */
+  align-items: center; /* Vertically aligns them in the middle */
+  border-bottom: 2px solid #DEE2E6;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.adminTable th {
+    background-color: #F8F9FA;
+    font-weight: bold; /* Changed from 600 to bold */
+    color: #0038A8;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #EAECEE;
+    vertical-align: middle;
+}
+
+/* --- Styles for Officials Card Layout --- */
+
+.officialsListContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Space between each official's card */
+}
+
+.officialCard {
+  display: flex;
+  align-items: center;
+  gap: 25px; /* Space between photo, details, and buttons */
+  background-color: #FFFFFF;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.officialCard:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.officialCardPhoto {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%; /* Makes the photo circular */
+  flex-shrink: 0;
+  background-color: #f0f0f0;
+  border: 3px solid #e9ecef;
+}
+
+.officialCardDetails {
+  flex-grow: 1; /* Ensures the details section takes up available space */
+}
+
+.officialName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  color: #343a40;
+}
+
+.officialPosition {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.officialCardActions {
+  display: flex;
+  gap: 10px;
+}
