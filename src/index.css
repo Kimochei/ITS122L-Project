@@ -1,14 +1,14 @@
-body {
+html, body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
-  /* --- THEME UPDATE --- */
+
   background-color: #F4F4F9; /* Off-White Background */
   color: #212529; /* Dark Charcoal Text */
+  overflow-x: hidden; /* ADDED: Prevents horizontal scrolling */
 }
 
 code {

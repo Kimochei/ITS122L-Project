@@ -8,13 +8,11 @@
   flex-grow: 1;
 }
 
-/* --- New Header Styles --- */
 .appHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* REMOVED: padding: 0 20px; to make the blue header full-width */
-  padding: 0;
+  padding: 0; /* Ensures full-width background */
   background-color: #062b76;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   height: 60px;
@@ -144,9 +142,10 @@
 .footer {
   background-color: #062b76;
   color: #EAECEE;
-  padding: 40px 50px;
+  padding: 40px 0;
   margin-top: auto;
 }
+
 .footerContent {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
