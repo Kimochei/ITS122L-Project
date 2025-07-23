@@ -39,7 +39,7 @@ app = FastAPI(title="sKonnect API")
 origins = [
     "http://localhost:5173",
     "https://its122l-project.onrender.com",
-    "https://its-122-l-project-lovat.vercel.app/",  
+    "https://its-122-l-project-skonnect.vercel.app/",  
     # add deployed frontend's URL here later
 ]
                               
