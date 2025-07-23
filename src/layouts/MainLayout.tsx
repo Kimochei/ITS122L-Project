@@ -1,5 +1,4 @@
-// src/layouts/MainLayout.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/MainLayout.module.css';
 import logo from '../assets/skonnect-logo.png';

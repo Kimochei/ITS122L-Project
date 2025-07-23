@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../pagestyles/LandingPage.module.css';
 import PostModal from '../components/PostModal'; 
 import headerImage from '../assets/Malitbog-header.png'; 

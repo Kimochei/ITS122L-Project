@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import styles from '../pagestyles/ImageUploader.module.css';
 
 interface ImageUploaderProps {

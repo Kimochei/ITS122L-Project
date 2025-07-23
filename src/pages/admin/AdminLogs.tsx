@@ -18,7 +18,7 @@ interface ActivityLog {
 
 // Create an Axios instance to automatically handle the token
 const api = axios.create({
-  baseURL: API_BASE_URL, // *** MODIFIED: Use API_BASE_URL here ***
+  baseURL: API_BASE_URL,
 });
 
 // Add a request interceptor to include the auth token in all requests
@@ -35,7 +35,7 @@ const AdminLogs: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1); // Keep for potential future use with total count from API
+  const [totalPages, setTotalPages] = useState(1); 
   const [sortBy, setSortBy] = useState<'timestamp' | 'user' | 'action'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const logsPerPage = 20; // As requested
@@ -59,6 +59,7 @@ const AdminLogs: React.FC = () => {
       // For now, let's assume we fetch all and calculate or use a dummy total.
       // In a real app, the backend would provide total_count.
       // Placeholder: Assume total items is at least enough for current page to show buttons
+      // Calculate total pages based on whether there might be more items
       setTotalPages(currentPage + (response.data.length === logsPerPage ? 1 : 0));
 
     } catch (err: any) {
@@ -75,7 +76,7 @@ const AdminLogs: React.FC = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [fetchLogs]); // Dependency array includes fetchLogs
+  }, [fetchLogs]);
 
   const handleSort = (column: 'timestamp' | 'user' | 'action') => {
     if (sortBy === column) {
@@ -142,10 +143,12 @@ const AdminLogs: React.FC = () => {
           >
             Previous
           </button>
-          <span style={{color: '#333'}}>Page {currentPage}</span>
+          {/* MODIFIED: Display currentPage and totalPages */}
+          <span style={{color: '#333'}}>Page {currentPage} of {totalPages}</span>
           <button 
             onClick={() => setCurrentPage(prev => prev + 1)} 
-            disabled={logs.length < logsPerPage} // Disable if current page is not full
+            // MODIFIED: Correctly disable Next button using totalPages and logs.length
+            disabled={currentPage >= totalPages || logs.length === 0} 
             className={`${styles.actionButton}`}
           >
             Next

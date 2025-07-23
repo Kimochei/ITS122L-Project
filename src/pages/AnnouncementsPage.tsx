@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../pagestyles/AnnouncementsPage.module.css';
 import PostModal from '../components/PostModal'; // Import the reusable modal
 

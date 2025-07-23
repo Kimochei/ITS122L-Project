@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import OfficialDetailModal from '../components/OfficialDetailModal';
 import styles from '../pagestyles/OfficialsPage.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
+
 interface Official {
   id: number;
   name: string;
@@ -10,10 +13,6 @@ interface Official {
   bio: string;
   contributions: string;
 }
-
-// Get the API base URL from Vite environment variables (configured in Vercel)
-// During local development, ensure VITE_API_BASE_URL is set in your .env file
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
 
 // --- HIERARCHY DEFINITION ---
 // We assign a number to each position to define its rank.
@@ -45,7 +44,8 @@ const getCategory = (position: string): string => {
 };
 
 const OfficialsPage: React.FC = () => {
-  const [officials, setOfficials] = useState<Official[]>([]);
+  // MODIFIED: Use _ to indicate that the 'officials' variable is not directly read
+  const [_, setOfficials] = useState<Official[]>([]);
   const [groupedOfficials, setGroupedOfficials] = useState<{ [key: string]: Official[] }>({});
   const [selectedOfficial, setSelectedOfficial] = useState<Official | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,8 +83,7 @@ const OfficialsPage: React.FC = () => {
         }
 
         setGroupedOfficials(groups);
-        setOfficials(data);
-
+        setOfficials(data); // This line is fine, as setOfficials is used
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {

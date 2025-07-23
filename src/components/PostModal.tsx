@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../componentstyles/PostModal.module.css';
 import Modal from './Modal'; // Assuming Modal.tsx is in the same directory
 import axios from 'axios';

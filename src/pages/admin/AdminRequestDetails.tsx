@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from '../../pagestyles/AdminRequestDetails.module.css'; // We'll create this file next
 
