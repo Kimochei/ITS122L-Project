@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from '../pagestyles/ApiTestPage.module.css'; // This uses the same CSS as before
 

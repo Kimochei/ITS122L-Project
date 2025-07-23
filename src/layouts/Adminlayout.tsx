@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/AdminLayout.module.css';
 import logo from '../assets/skonnect-logo-white.png';
