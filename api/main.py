@@ -37,7 +37,8 @@ app = FastAPI(title="sKonnect API")
 
 # --- CORS Middleware Setup ---
 origins = [
-    "http://localhost:5173",  # Your frontend's local development address
+    "http://localhost:5173",
+    "https://its122l-project.onrender.com",  
     # add deployed frontend's URL here later
 ]
 
