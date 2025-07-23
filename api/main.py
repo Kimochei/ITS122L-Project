@@ -38,7 +38,8 @@ app = FastAPI(title="sKonnect API")
 # --- CORS Middleware Setup ---
 origins = [
     "http://localhost:5173",
-    "https://its122l-project.onrender.com",  
+    "https://its122l-project.onrender.com",
+    "https://its-122-l-project-jr2kolwmo-skonnect.vercel.app/announcements",  
     # add deployed frontend's URL here later
 ]
 
