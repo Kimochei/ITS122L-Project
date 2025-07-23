@@ -3,12 +3,14 @@ import styles from '../componentstyles/PostModal.module.css';
 import Modal from './Modal'; // Assuming Modal.tsx is in the same directory
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface Comment {
   id: number;
   author_name: string;
   content: string;
   created_at: string;
-  is_inappropriate: boolean; // Corrected: Ensure this is part of the interface for filtering
+  is_inappropriate: boolean;
 }
 interface Media {
   url: string;
@@ -30,6 +32,9 @@ interface PostModalProps {
   onClose: () => void;
 }
 
+// Create an Axios instance with the dynamic base URL
+const api = axios.create({ baseURL: API_BASE_URL });
+
 const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
   const [post, setPost] = useState<FullPost | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,8 +55,10 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
       setLoading(true);
       setSelectedMedia(null);
       try {
-        const response = await fetch(`http://127.0.0.1:8000/posts/${postId}`);
-        if (!response.ok) throw new Error('Post not found.');
+        const response = await fetch(`${API_BASE_URL}/posts/${postId}`);
+        if (!response.ok) {
+          throw new Error('Post not found.');
+        }
         const data: FullPost = await response.json();
         setPost(data);
 
@@ -83,17 +90,21 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
     setIsSubmittingComment(true);
     try {
       const commentData = { author_name: authorName.trim() || "Anonymous", content: newComment };
-      const response = await axios.post(`http://127.0.0.1:8000/posts/${post.id}/comments/`, commentData); // Using axios.post
-      if (!response.status.toString().startsWith('2')) throw new Error('Failed to post comment.'); // Check status code for axios
+      const response = await api.post(`/posts/${post.id}/comments/`, commentData); 
+      if (!response.status.toString().startsWith('2')) {
+        throw new Error('Failed to post comment.'); 
+      }
 
       setNewComment('');
       setAuthorName('');
-      // Refetch post to show the new comment (including its inappropriate status)
-      const postResponse = await fetch(`http://127.0.0.1:8000/posts/${postId}`);
+      const postResponse = await fetch(`${API_BASE_URL}/posts/${postId}`);
+      if (!postResponse.ok) {
+        throw new Error('Failed to refetch post after comment.');
+      }
       const updatedPost = await postResponse.json();
       setPost(updatedPost);
     } catch (error) {
-      console.error('Failed to submit your comment:', error); // Use console.error for better debugging
+      console.error('Failed to submit your comment:', error);
       alert('Failed to submit your comment.');
     } finally {
       setIsSubmittingComment(false);
@@ -105,8 +116,6 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
       return <div className={styles.mediaPlaceholder}>No Media Available</div>;
     }
 
-    // Using the URL as a `key` is crucial. It tells React to create a
-    // new element when the src changes, avoiding loading issues.
     if (media.media_type.startsWith('video')) {
       return (
         <video
@@ -121,12 +130,11 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
       );
     }
 
-    return <img key={media.url} src={media.url} alt="Selected media" className={styles.mainMedia} />;
+    return <img key={media.url} src={media.url} alt="Selected media" className={styles.mainMedia} loading="lazy" />;
   };
 
   // Filter out inappropriate comments for display
   const visibleComments = post?.comments ? post.comments.filter(comment => !comment.is_inappropriate) : [];
-
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} contentClass={styles.postModalContainer}>
@@ -139,7 +147,6 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
             <div className={styles.postDetails}>
               <h1 className={styles.postTitle}>{post.title}</h1>
               <p className={styles.postMeta}>By {post.author.username} on {new Date(post.created_at).toLocaleDateString()}</p>
-              {/* Ensure post content is safely rendered */}
               <div className={styles.postContent} dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
 
               {galleryMedia.length > 1 && (
@@ -150,12 +157,13 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
                       <div key={index} className={`${styles.galleryItem} ${selectedMedia?.url === item.url ? styles.selected : ''}`} onClick={() => setSelectedMedia(item)}>
                         {item.media_type.startsWith('video') ? (
                            <div className={styles.videoThumbnailWrapper}>
-                             <video className={styles.galleryThumbnail}><source src={item.url} type={item.media_type}/></video>
-                             <div className={styles.playIcon}>▶</div>
+                               {/* Corrected: Ensure video and source tags are properly closed and nested */}
+                               <video className={styles.galleryThumbnail}><source src={item.url} type={item.media_type}></source></video> 
+                               <div className={styles.playIcon}>▶</div>
                            </div>
-                        ) : (
-                          <img src={item.url} alt={`Item ${index + 1}`} className={styles.galleryThumbnail} />
-                        )}
+                         ) : (
+                           <img src={item.url} alt={`Item ${index + 1}`} className={styles.galleryThumbnail} loading="lazy" />
+                         )}
                       </div>
                     ))}
                   </div>
@@ -163,9 +171,9 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
               )}
 
               <div className={styles.commentsSection}>
-                  <h3>Comments ({visibleComments.length})</h3> {/* Corrected: Use visibleComments.length */}
+                  <h3>Comments ({visibleComments.length})</h3>
                   <div className={styles.commentList}>
-                      {visibleComments.length > 0 ? ( // Corrected: Use visibleComments
+                      {visibleComments.length > 0 ? (
                           visibleComments.map(comment => (
                               <div key={comment.id} className={styles.comment}>
                                   <h4>{comment.author_name}</h4>

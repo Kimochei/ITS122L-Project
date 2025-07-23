@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from '../pagestyles/SignInPage.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 const SignInPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -10,7 +12,6 @@ const SignInPage = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ... (Your existing handleSignIn logic)
     setError('');
 
     const details = new URLSearchParams();
@@ -18,7 +19,8 @@ const SignInPage = () => {
     details.append('password', password);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/token', {
+      // *** MODIFIED: Use API_BASE_URL ***
+      const response = await fetch(`${API_BASE_URL}/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: details,
@@ -40,11 +42,9 @@ const SignInPage = () => {
   return (
     <div className={styles.signinContainer}>
       <form className={styles.signinForm} onSubmit={handleSignIn}>
-        {}
         <Link to="/" className={styles.backLink}>‹ Back to Site</Link>
 
         <h2>Admin Sign In</h2>
-        {/* ... (The rest of your form JSX) ... */}
         <div className={styles.formGroup}>
           <label htmlFor="username">Username</label>
           <input type="text" id="username" value={username} onChange={e => setUsername(e.target.value)} required />

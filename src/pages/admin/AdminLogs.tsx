@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from '../../pagestyles/AdminPage.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface ActivityLog {
   id: number;
   timestamp: string;
@@ -16,7 +18,7 @@ interface ActivityLog {
 
 // Create an Axios instance to automatically handle the token
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: API_BASE_URL, // *** MODIFIED: Use API_BASE_URL here ***
 });
 
 // Add a request interceptor to include the auth token in all requests
@@ -33,7 +35,7 @@ const AdminLogs: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(1); // Keep for potential future use with total count from API
   const [sortBy, setSortBy] = useState<'timestamp' | 'user' | 'action'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const logsPerPage = 20; // As requested
@@ -56,8 +58,6 @@ const AdminLogs: React.FC = () => {
       // For total pages, you would ideally get a total count from the API
       // For now, let's assume we fetch all and calculate or use a dummy total.
       // In a real app, the backend would provide total_count.
-      // For demonstration, assuming a large number of logs to show pagination.
-      // setTotalPages(Math.ceil(totalCount / logsPerPage)); 
       // Placeholder: Assume total items is at least enough for current page to show buttons
       setTotalPages(currentPage + (response.data.length === logsPerPage ? 1 : 0));
 
@@ -75,7 +75,7 @@ const AdminLogs: React.FC = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [fetchLogs]);
+  }, [fetchLogs]); // Dependency array includes fetchLogs
 
   const handleSort = (column: 'timestamp' | 'user' | 'action') => {
     if (sortBy === column) {

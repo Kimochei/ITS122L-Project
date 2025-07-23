@@ -11,6 +11,10 @@ interface Official {
   contributions: string;
 }
 
+// Get the API base URL from Vite environment variables (configured in Vercel)
+// During local development, ensure VITE_API_BASE_URL is set in your .env file
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 // --- HIERARCHY DEFINITION ---
 // We assign a number to each position to define its rank.
 const positionOrder: { [key: string]: number } = {
@@ -52,7 +56,9 @@ const OfficialsPage: React.FC = () => {
     const fetchAndGroupOfficials = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/officials/');
+        setError(null); // Clear any previous errors
+
+        const response = await fetch(`${API_BASE_URL}/officials/`);
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ detail: 'Failed to load officials data.' }));
             throw new Error(errorData.detail);
@@ -86,7 +92,7 @@ const OfficialsPage: React.FC = () => {
       }
     };
     fetchAndGroupOfficials();
-  }, []);
+  }, []); // Empty dependency array means this runs once on component mount
 
   const handleOpenModal = (official: Official) => {
     setSelectedOfficial(official);
@@ -117,7 +123,7 @@ const OfficialsPage: React.FC = () => {
             <div className={styles.officialsGrid}>
               {groupedOfficials[category].map((official) => (
                 <div key={official.id} className={styles.officialCard} onClick={() => handleOpenModal(official)}>
-                  <img src={official.photo_url || 'https://placehold.co/280x300/EEE/31343C?text=No+Image'} alt={official.name} className={styles.cardImage} />
+                  <img src={official.photo_url || 'https://placehold.co/280x300/EEE/31343C?text=No+Image'} alt={official.name} className={styles.cardImage} loading="lazy" />
                   <div className={styles.cardBody}>
                     <h3 className={styles.cardName}>{official.name}</h3>
                     <p className={styles.cardPosition}>{official.position}</p>

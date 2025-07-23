@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from '../../pagestyles/AdminPage.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface Comment {
   id: number;
   author_name: string;
@@ -14,7 +16,7 @@ interface Comment {
 
 // Create an Axios instance to automatically handle the token
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: API_BASE_URL, // *** MODIFIED: Use API_BASE_URL here ***
 });
 
 // Add a request interceptor to include the auth token in all requests
@@ -37,7 +39,7 @@ const AdminComments: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = '/admin/comments/';
+      let url = '/admin/comments/'; // Axios baseURL handles the base part
       if (filter === 'flagged') {
         url += '?is_inappropriate=true';
       } else if (filter === 'unflagged') {
@@ -59,12 +61,12 @@ const AdminComments: React.FC = () => {
 
   useEffect(() => {
     fetchComments();
-  }, [fetchComments]);
+  }, [fetchComments]); // Dependency array includes fetchComments
 
   const handleFlag = async (commentId: number) => {
     if (window.confirm('Are you sure you want to flag this comment as inappropriate?')) {
       try {
-        await api.patch(`/admin/comments/${commentId}/flag`);
+        await api.patch(`/admin/comments/${commentId}/flag`); // Axios baseURL handles the base part
         fetchComments(); // Refresh list
       } catch (err) {
         alert('Failed to flag comment.');
@@ -76,7 +78,7 @@ const AdminComments: React.FC = () => {
   const handleUnflag = async (commentId: number) => {
     if (window.confirm('Are you sure you want to unflag this comment?')) {
       try {
-        await api.patch(`/admin/comments/${commentId}/unflag`);
+        await api.patch(`/admin/comments/${commentId}/unflag`); // Axios baseURL handles the base part
         fetchComments(); // Refresh list
       } catch (err) {
         alert('Failed to unflag comment.');
@@ -88,7 +90,7 @@ const AdminComments: React.FC = () => {
   const handleDelete = async (commentId: number) => {
     if (window.confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
       try {
-        await api.delete(`/admin/comments/${commentId}`);
+        await api.delete(`/admin/comments/${commentId}`); // Axios baseURL handles the base part
         fetchComments(); // Refresh list
       } catch (err) {
         alert('Failed to delete comment.');

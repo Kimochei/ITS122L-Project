@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from '../pagestyles/SignInPage.module.css'; // Reusing styles
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -22,11 +24,12 @@ const SignUpPage = () => {
       return;
     }
 
-    //  ADD 'display_name' to the data sent to the API 
+    // ADD 'display_name' to the data sent to the API
     const userData = { username, email, password, display_name: displayName };
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/register/', {
+      // *** MODIFIED: Use API_BASE_URL ***
+      const response = await fetch(`${API_BASE_URL}/register/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -49,7 +52,7 @@ const SignUpPage = () => {
       <form className={styles.signinForm} onSubmit={handleSignUp}>
         <h2>Create Admin Account</h2>
         
-        {/*  NEW INPUT FIELD ADDED HERE  */}
+        {/* NEW INPUT FIELD ADDED HERE */}
         <div className={styles.formGroup}>
           <label htmlFor="displayName">Display Name (Optional)</label>
           <input type="text" id="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />

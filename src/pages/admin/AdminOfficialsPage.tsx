@@ -3,6 +3,8 @@ import axios from 'axios';
 import styles from '../../pagestyles/AdminPage.module.css';
 import OfficialFormModal from '../../components/OfficialFormModal';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 // Define the Official interface with an optional ID
 interface Official {
   id?: number;
@@ -15,7 +17,7 @@ interface Official {
 
 // Create an Axios instance to automatically handle the token
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: API_BASE_URL, // *** MODIFIED: Use API_BASE_URL here ***
 });
 
 // Add a request interceptor to include the auth token in all requests
@@ -37,7 +39,7 @@ const AdminOfficialsPage: React.FC = () => {
   const fetchOfficials = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/officials/');
+      const response = await api.get('/officials/'); // Axios baseURL handles the base part
       setOfficials(response.data);
       setError(null);
     } catch (err) {
@@ -65,7 +67,7 @@ const AdminOfficialsPage: React.FC = () => {
   const handleDeleteClick = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this official?')) {
       try {
-        await api.delete(`/admin/officials/${id}`);
+        await api.delete(`/admin/officials/${id}`); // Axios baseURL handles the base part
         fetchOfficials();
       } catch (err) {
         setError('Failed to delete official.');
@@ -85,7 +87,7 @@ const AdminOfficialsPage: React.FC = () => {
         formData.append('file', imageFile);
 
         // Post the file to our new backend endpoint
-        const uploadResponse = await api.post('/admin/upload-official-image', formData, {
+        const uploadResponse = await api.post('/admin/upload-official-image', formData, { // Axios baseURL handles the base part
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -100,9 +102,9 @@ const AdminOfficialsPage: React.FC = () => {
 
       // Save the official's data to the database (this part was always correct)
       if (editingOfficial) {
-        await api.put(`/admin/officials/${editingOfficial.id}`, finalOfficialData);
+        await api.put(`/admin/officials/${editingOfficial.id}`, finalOfficialData); // Axios baseURL handles the base part
       } else {
-        await api.post('/admin/officials/', finalOfficialData);
+        await api.post('/admin/officials/', finalOfficialData); // Axios baseURL handles the base part
       }
 
       // Close the modal and refresh the list
@@ -135,14 +137,15 @@ const AdminOfficialsPage: React.FC = () => {
               src={official.photo_url || 'https://via.placeholder.com/80'}
               alt={official.name}
               className={styles.officialCardPhoto}
+              loading="lazy" // Add lazy loading for images
             />
             <div className={styles.officialCardDetails}>
               <h3 className={styles.officialName}>{official.name}</h3>
               <p className={styles.officialPosition}>{official.position}</p>
             </div>
             <div className={styles.officialCardActions}>
-                               <button onClick={() => handleEditClick(official)} className={`${styles.actionButton} ${styles.edit}`}>Edit</button>
-                              {official.id && <button onClick={() => handleDeleteClick(official.id!)} className={`${styles.actionButton} ${styles.reject}`}>Delete</button>}
+              <button onClick={() => handleEditClick(official)} className={`${styles.actionButton} ${styles.edit}`}>Edit</button>
+              {official.id && <button onClick={() => handleDeleteClick(official.id!)} className={`${styles.actionButton} ${styles.reject}`}>Delete</button>}
             </div>
           </div>
         )) : (

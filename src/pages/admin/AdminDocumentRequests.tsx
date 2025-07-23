@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../../pagestyles/AdminPage.module.css';
 import Modal from '../../components/Modal';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface DocumentRequest {
   id: number;
   requester_name: string;
@@ -32,16 +34,25 @@ const AdminDocumentRequests = () => {
     const token = localStorage.getItem('accessToken');
     if (!token) { navigate('/signin'); return; }
     try {
-      const response = await fetch('http://127.0.0.1:8000/admin/requests/', {
+      // *** MODIFIED: Use API_BASE_URL ***
+      const response = await fetch(`${API_BASE_URL}/admin/requests/`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error('Failed to fetch data.');
+      if (!response.ok) {
+        throw new Error('Failed to fetch data.');
+      }
       const data = await response.json();
       setRequests(data);
-    } catch (err: any) { setError(err.message); } finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchRequests(); }, [navigate]);
+  useEffect(() => {
+    fetchRequests();
+  }, [navigate]); // navigate is a dependency here, good practice.
 
   const openModal = (e: React.MouseEvent, request: DocumentRequest, action: 'approve' | 'reject' | 'complete') => {
     e.stopPropagation();
@@ -62,15 +73,23 @@ const AdminDocumentRequests = () => {
     if (e) e.stopPropagation();
     if (!message || !message.trim()) { alert("A message is required to update the status."); return; }
     const token = localStorage.getItem('accessToken');
+    if (!token) { navigate('/signin'); return; } // Ensure token exists before trying to update
+
     try {
-      await fetch(`http://127.0.0.1:8000/admin/document-requests/${request.id}/status`, {
+      // *** MODIFIED: Use API_BASE_URL ***
+      await fetch(`${API_BASE_URL}/admin/document-requests/${request.id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ status: newStatus, admin_message: message }),
       });
-      fetchRequests();
+      fetchRequests(); // Re-fetch requests to update the UI
       closeModal();
-    } catch (err) { alert("Failed to update status."); }
+    } catch (err) {
+      alert("Failed to update status.");
+    }
   };
 
   const handleModalSubmit = () => {

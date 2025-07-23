@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styles from '../pagestyles/AnnouncementsPage.module.css';
 import PostModal from '../components/PostModal'; // Import the reusable modal
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface Post {
   id: number;
   title: string;
@@ -24,7 +26,8 @@ const AnnouncementsPage = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/posts/');
+        // *** MODIFIED: Use the API_BASE_URL constant here ***
+        const response = await fetch(`${API_BASE_URL}/posts/`);
         if (!response.ok) {
           throw new Error('Failed to fetch posts from the server.');
         }
@@ -37,7 +40,7 @@ const AnnouncementsPage = () => {
       }
     };
     fetchPosts();
-  }, []);
+  }, []); // Empty dependency array means this runs once on component mount
 
   if (loading) {
     return <div className={styles.announcementsContainer}><h2>Loading announcements...</h2></div>;
@@ -58,7 +61,7 @@ const AnnouncementsPage = () => {
               // Each card is now a clickable div
               <div key={post.id} className={styles.postCard} onClick={() => setSelectedPostId(post.id)}>
                 {post.primary_image_url && (
-                  <img src={post.primary_image_url} alt={post.title} className={styles.postImage} />
+                  <img src={post.primary_image_url} alt={post.title} className={styles.postImage} loading="lazy" />
                 )}
                 <div className={styles.postContent}>
                   <h2>{post.title}</h2>

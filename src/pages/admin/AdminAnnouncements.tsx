@@ -6,6 +6,8 @@ import Modal from '../../components/Modal';
 import PostForm from '../../components/PostForm';
 import AdminPostPreview from '../../components/AdminPostPreview';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface Media {
   url: string;
   media_type: string;
@@ -21,7 +23,24 @@ interface Post {
   media: Media[];
 }
 
-const api = axios.create({ baseURL: 'http://127.0.0.1:8000' });
+// *** MODIFIED: Define Axios instance and set up interceptor OUTSIDE the component ***
+// This ensures the Axios instance and its interceptor are created only once
+const api = axios.create({ baseURL: API_BASE_URL });
+
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+// *** END MODIFIED SECTION ***
+
 
 const AdminAnnouncements: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -34,6 +53,9 @@ const AdminAnnouncements: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Removed: useEffect for interceptor (it's now defined globally)
+
+
   const fetchPosts = async () => {
     setLoading(true);
     const token = localStorage.getItem('accessToken');
@@ -41,13 +63,13 @@ const AdminAnnouncements: React.FC = () => {
       navigate('/signin');
       return;
     }
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    // Token is now handled by the global interceptor, no need for manual headers here.
     try {
-      const response = await api.get('/posts/');
+      const response = await api.get('/posts/'); 
       setPosts(response.data);
     } catch (error) {
       console.error('Failed to fetch posts', error);
-      if ((error as any).response?.status === 401) {
+      if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
         localStorage.removeItem('accessToken');
         navigate('/signin');
       }
@@ -58,15 +80,16 @@ const AdminAnnouncements: React.FC = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, [navigate]);
+  }, [navigate]); // navigate is a dependency here, good practice.
 
   const handleDelete = async (postId: number) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
-        await api.delete(`/admin/posts/${postId}`);
+        await api.delete(`/admin/posts/${postId}`); 
         fetchPosts();
       } catch (error) {
         alert('Failed to delete post.');
+        console.error(error);
       }
     }
   };
@@ -103,8 +126,8 @@ const AdminAnnouncements: React.FC = () => {
         formData.append('file', newPrimaryImage);
 
         // Call our new, working backend endpoint
-        const uploadRes = await api.post('/admin/upload-announcement-image', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
+        const uploadRes = await api.post('/admin/upload-announcement-image', formData, { 
+            headers: { 'Content-Type': 'multipart/form-data' }, // Axios handles token via interceptor
         });
         finalPrimaryUrl = uploadRes.data.public_url;
       }
@@ -115,8 +138,8 @@ const AdminAnnouncements: React.FC = () => {
         const formData = new FormData();
         formData.append('file', file);
         
-        const uploadRes = await api.post('/admin/upload-announcement-image', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
+        const uploadRes = await api.post('/admin/upload-announcement-image', formData, { 
+            headers: { 'Content-Type': 'multipart/form-data' }, // Axios handles token via interceptor
         });
         newMediaItems.push({ url: uploadRes.data.public_url, media_type: file.type.startsWith('video') ? 'video' : 'image' });
       }
@@ -131,9 +154,9 @@ const AdminAnnouncements: React.FC = () => {
 
       // Save the post data to the database
       if (selectedPost) {
-        await api.put(`/admin/posts/${selectedPost.id}`, finalPostData);
+        await api.put(`/admin/posts/${selectedPost.id}`, finalPostData); 
       } else {
-        await api.post('/admin/posts/', finalPostData);
+        await api.post('/admin/posts/', finalPostData); 
       }
       
       handleCloseModals();
@@ -161,7 +184,7 @@ const AdminAnnouncements: React.FC = () => {
             posts.map(post => (
               <div key={post.id} className={styles.postCard}>
                 {post.primary_image_url ? (
-                  <img src={post.primary_image_url} alt={post.title} className={styles.postThumbnail} />
+                  <img src={post.primary_image_url} alt={post.title} className={styles.postThumbnail} loading="lazy" /> 
                 ) : (
                   <div className={styles.thumbnailPlaceholder}>N/A</div>
                 )}

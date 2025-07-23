@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styles from '../pagestyles/DocumentRequestsPage.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface TrackedRequest {
   requester_name: string;
   document_type: string;
@@ -41,7 +43,8 @@ const DocumentRequestsPage = () => {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/document-requests/', {
+      // *** MODIFIED: Use API_BASE_URL ***
+      const response = await fetch(`${API_BASE_URL}/document-requests/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
@@ -73,8 +76,11 @@ const DocumentRequestsPage = () => {
     setError('');
     setTrackedRequest(null);
     try {
-        const response = await fetch(`http://127.0.0.1:8000/document-requests/status/${trackingTokenInput}`);
-        if (!response.ok) throw new Error('Invalid or expired tracking token.');
+      // *** MODIFIED: Use API_BASE_URL ***
+        const response = await fetch(`${API_BASE_URL}/document-requests/status/${trackingTokenInput}`);
+        if (!response.ok) {
+          throw new Error('Invalid or expired tracking token.');
+        }
         const result = await response.json();
         setTrackedRequest(result);
         setMessage('');

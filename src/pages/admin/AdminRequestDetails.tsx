@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from '../../pagestyles/AdminRequestDetails.module.css'; // We'll create this file next
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
+
 interface DocumentRequest {
   id: number;
   requester_name: string;
@@ -12,6 +14,7 @@ interface DocumentRequest {
   purpose: string;
   status: string;
   created_at: string;
+  updated_at: string | null; // Added based on schema for completeness
   admin_message: string | null;
 }
 
@@ -31,10 +34,14 @@ const AdminRequestDetails = () => {
       if (!token) { navigate('/signin'); return; }
       
       try {
-        const response = await fetch(`http://127.0.0.1:8000/admin/requests/${requestId}`, {
+        // *** MODIFIED: Use API_BASE_URL ***
+        const response = await fetch(`${API_BASE_URL}/admin/requests/${requestId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch request details.');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to fetch request details.');
+        }
         const data = await response.json();
         setRequest(data);
         setStatus(data.status);
@@ -46,14 +53,20 @@ const AdminRequestDetails = () => {
       }
     };
     fetchRequestDetails();
-  }, [requestId, navigate]);
+  }, [requestId, navigate]); // Add navigate to dependencies as it's used in useEffect
 
   const handleUpdate = async () => {
     const token = localStorage.getItem('accessToken');
+    if (!token) { navigate('/signin'); return; } // Ensure token exists before trying to update
+
     try {
-      await fetch(`http://127.0.0.1:8000/admin/document-requests/${requestId}/status`, {
+      // *** MODIFIED: Use API_BASE_URL ***
+      await fetch(`${API_BASE_URL}/admin/document-requests/${requestId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ status, admin_message: adminMessage }),
       });
       alert('Status updated successfully!');
