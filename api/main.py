@@ -39,10 +39,10 @@ app = FastAPI(title="sKonnect API")
 origins = [
     "http://localhost:5173",
     "https://its122l-project.onrender.com",
-    "https://its-122-l-project-jr2kolwmo-skonnect.vercel.app/announcements",  
+    "https://its-122-l-project-lovat.vercel.app/",  
     # add deployed frontend's URL here later
 ]
-
+                              
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
