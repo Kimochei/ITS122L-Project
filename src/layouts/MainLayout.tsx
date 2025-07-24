@@ -81,14 +81,14 @@ const MainLayout = () => {
           <div className={styles.footerContent}>
             <div className={styles.footerLogoSection}>
               <div className={styles.logoPlaceholder}></div>
-              <h3>Barangay [Name]</h3>
+              <h3>Barangay Bambang</h3>
             </div>
             <div className={styles.footerInfo}>
               <h4>Contact Information</h4>
-              <p>📞 Number (Position) </p>
-              <p>📞 Tel No. (Organization)</p>
-              <p>✉️ email (Email)</p>
-              <p>📍 (Specific Address), (Barangay), (Municipality), (Province), (Zip code)</p>
+              <p>📞 09690687041 (SK Chairman) </p>
+              <p>📞 (02) 813-1243 (Sangguniang Barangay)</p>
+              <p>✉️ skbambangbulakan@gmail.com</p>
+              <p>📍 Multi-Purpose Hall, Purok 3, Bambang, Bulakan, Bulacan, 3017</p>
             </div>
             <div className={styles.footerLinks}>
               <h4>Site Links</h4>
