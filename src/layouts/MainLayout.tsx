@@ -3,6 +3,7 @@ import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/MainLayout.module.css';
 import logo from '../assets/skonnect-logo.png';
 import PageLoader from '../components/PageLoader'; // Import the new loader component
+import footerLogo from '../assets/3.png'; // NEW: Import the 3.png image
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,7 +67,6 @@ const MainLayout = () => {
           <button className={styles.openbtn} onClick={openNav}>
             ☰
           </button>
-          <span className={styles.headerTitle}>sKonnect by Kim Miguel Sobrepena</span>
         </header>
 
         <main className={styles.main}>
@@ -80,7 +80,7 @@ const MainLayout = () => {
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={styles.footerLogoSection}>
-              <div className={styles.logoPlaceholder}></div>
+              <img src={footerLogo} alt="Barangay Logo" className={styles.footerImage} /> {/* NEW: Footer image */}
               <h3>Barangay Bambang</h3>
             </div>
             <div className={styles.footerInfo}>

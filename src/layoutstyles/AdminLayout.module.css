@@ -1,82 +1,229 @@
-.layoutContainer {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f4f6f9; /* Background for the content area */
+/* src/layoutstyles/AdminLayout.module.css */
+
+.adminLayoutContainer {
+    display: flex;
+    min-height: 100vh;
+    /* This container holds the sidebar and main content side-by-side */
 }
 
+/* --- Admin Sidebar Styles --- */
 .sidebar {
-  width: 260px; /* Fixed width */
-  background-color: #212529; /* Dark background */
-  color: #f8f9fa;
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Full height */
-  position: fixed; /* Fixed position on the left */
-  top: 0;
-  left: 0;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    width: 250px; /* Default desktop width */
+    height: 100vh;
+    position: fixed; /* Fixed position for sidebar on both desktop and mobile */
+    top: 0;
+    left: 0;
+    background-color: #212529; /* Dark background for sidebar content */
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    z-index: 1000; /* Sidebar always on top (higher than header for mobile overlay) */
+    transition: left 0.3s ease; /* Smooth sliding transition for mobile */
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* Hide horizontal overflow */
+    box-sizing: border-box; /* Include padding in the width */
 }
+
+/* On desktop, the sidebar is effectively always "open" at left: 0 */
+@media (min-width: 769px) {
+    .sidebar {
+        left: 0 !important; /* Force sidebar open on desktop */
+    }
+    /* Hide the mobile-specific close button on desktop */
+    .sidebarHeader .closebtn {
+        display: none;
+    }
+}
+
+/* Mobile-specific states (applied by JavaScript) */
+.sidebar.open {
+    left: 0; /* Sidebar is visible (slides in from left) */
+}
+
+.sidebar.closed {
+    left: -250px; /* Sidebar is hidden (slid off-screen to the left) */
+}
+
+
+/* --- Admin Header Styles --- */
+.adminHeader {
+    position: fixed; /* Make the header fixed */
+    top: 0;
+    left: 250px; /* Default desktop: aligns with main content, next to sidebar */
+    width: calc(100% - 250px); /* Desktop width: remaining space */
+    height: 60px; /* Standard header height */
+    background-color: #062b76; /* Dark blue */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 20px;
+    z-index: 900; /* Ensure it stays on top, but below sidebar for mobile overlay */
+    transition: left 0.3s ease, width 0.3s ease; /* Smooth transition */
+    box-sizing: border-box; /* Include padding in the width */
+}
+
+.adminHeaderTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #EAECEE;
+    margin-left: 20px; /* Space between button and title */
+    white-space: nowrap; /* Prevent title from wrapping */
+    overflow: hidden; /* Hide overflow if title is too long */
+    text-overflow: ellipsis; /* Add ellipsis if title is too long */
+}
+
+/* --- Main Content Area --- */
+.mainContent {
+    flex-grow: 1; /* Allows content to fill remaining horizontal space */
+    margin-left: 250px; /* Space for the default desktop sidebar */
+    padding: 20px;
+    padding-top: 80px; /* Space for the fixed header (60px header + 20px buffer) */
+    transition: margin-left 0.3s ease; /* Smooth transition when sidebar opens/closes */
+    box-sizing: border-box; /* Include padding in the element's total width */
+}
+
+/* --- Mobile Menu Button (Hamburger) --- */
+.mobileMenuButton {
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #EAECEE;
+    padding: 0;
+    margin-right: 20px;
+    display: none; /* Hidden by default on desktop */
+}
+
+
+/* --- Overlay for Mobile Sidebar --- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 999; /* Below sidebar (1000), above header (900) */
+    display: none; /* Hidden by default */
+}
+.overlay.active {
+    display: block; /* Show when sidebar is open */
+}
+
+/* --- Responsive Adjustments for Mobile (screens up to 768px wide) --- */
+@media (max-width: 768px) {
+    /* Admin Header adjustments for mobile */
+    .adminHeader {
+        left: 0; /* Header spans full width on mobile */
+        width: 100%;
+        /* The mobileMenuButton will be shown, effectively pushing content right */
+    }
+    .adminHeaderTitle {
+        font-size: 1.2rem; /* Smaller title on mobile */
+    }
+
+    /* Sidebar adjustments for mobile */
+    .sidebar {
+        /*
+         * This rule ensures the sidebar is always off-screen by default on mobile.
+         * The `sidebar.open` class will override this when the hamburger is clicked.
+         */
+        left: -250px;
+    }
+    /* `sidebar.open` and `sidebar.closed` classes are handled by JS to toggle `left: 0` and `left: -250px` */
+
+    /* Main Content adjustments for mobile */
+    .mainContent {
+        margin-left: 0; /* No margin on mobile, content takes full width */
+        width: 100%; /* Content takes full width */
+        padding-top: 80px; /* Maintain space for the fixed header */
+    }
+
+    /* Mobile menu button visibility on mobile */
+    .mobileMenuButton {
+        display: block; /* Show the hamburger button on mobile */
+        color: #EAECEE; /* Ensure color is visible on dark header */
+    }
+
+    /* Close button inside sidebar header on mobile */
+    .sidebarHeader .closebtn {
+        display: block; /* Show close button when sidebar is open on mobile */
+        /* Make sure it's positioned correctly */
+        position: static; /* Reset absolute positioning if any */
+        margin-left: auto; /* Push to the right */
+    }
+}
+
+/* --- Common Sidebar Inner Styles (These mostly look good, minor tweaks for consistency) --- */
 
 .sidebarHeader {
-  padding: 20px;
-  background-color: #212529;
-  text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* To push close button to end on mobile */
+    padding: 15px 20px;
+    background-color: #212529; /* Consistent dark header for sidebar */
+    min-height: 60px; /* Ensure it's at least as tall as the main header */
 }
 
-.logo {
-  max-width: 150px;
-  height: auto;
+.sidebarHeader .logo {
+    max-width: 120px;
+    height: auto;
+}
+
+.sidebarHeader .closebtn {
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #EAECEE; /* Light color for visibility */
+    cursor: pointer;
+    /* `display: block` will be applied by media query for mobile */
 }
 
 .navLinks {
-  padding: 15px 0;
-  flex-grow: 1; /* Pushes footer to the bottom */
+    flex-grow: 1; /* Allows nav links to take available space */
+    padding: 20px 0;
 }
 
 .navLinks a {
-  color: #adb5bd;
-  padding: 15px 25px;
-  text-decoration: none;
-  display: block;
-  font-size: 1rem;
-  border-left: 4px solid transparent;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #ADB5BD; /* Light gray text for links */
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: background-color 0.2s, color 0.2s; /* Smooth hover effects */
+    white-space: nowrap; /* Prevent wrapping for nav items */
 }
 
-.navLinks a:hover {
-  background-color: #343a40;
-  color: #ffffff;
-}
-
+.navLinks a:hover,
 .navLinks a.active {
-  background-color: #0038A8;
-  color: #ffffff;
-  border-left-color: #FCD116; /* Yellow accent */
+    background-color: #495057; /* Darker background on hover/active */
+    color: #FFFFFF; /* White text on hover/active */
+}
+
+/* Placeholder for icons, if you add them to NavLink content */
+.navLinks a svg {
+    margin-right: 10px;
 }
 
 .sidebarFooter {
-  padding: 20px;
+    padding: 20px;
+    border-top: 1px solid #495057; /* Separator for footer */
 }
 
-.logoutBtn {
-  width: 100%;
-  padding: 12px;
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
+.sidebarFooter .logoutBtn {
+    width: 100%;
+    padding: 10px;
+    background-color: #dc3545; /* Red for logout button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
 }
 
-.mainContent {
-  flex-grow: 1;
-  margin-left: 260px; /* IMPORTANT: Creates space for the fixed sidebar */
-  padding: 0;
-}
-
-.pageContent {
-  padding: 30px;
+.sidebarFooter .logoutBtn:hover {
+    background-color: #c82333; /* Darker red on hover */
 }

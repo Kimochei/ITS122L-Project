@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
-import { lazy, Suspense } from 'react'; // Keep lazy and Suspense imports
+import { lazy, Suspense } from 'react';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -12,6 +12,7 @@ const SignUpPage = lazy(() => import('./pages/SignUpPage'));
 const AnnouncementsPage = lazy(() => import('./pages/AnnouncementsPage'));
 const DocumentRequestsPage = lazy(() => import('./pages/DocumentRequestsPage'));
 const OfficialsPage = lazy(() => import('./pages/OfficialsPage'));
+const About = lazy(() => import('./pages/About')); // Lazy load About page
 
 // Admin Pages (Lazy Loaded)
 const AdminHomePage = lazy(() => import('./pages/admin/AdminHomePage'));
@@ -21,10 +22,6 @@ const AdminAnnouncements = lazy(() => import('./pages/admin/AdminAnnouncements')
 const AdminOfficialsPage = lazy(() => import('./pages/admin/AdminOfficialsPage'));
 const AdminComments = lazy(() => import('./pages/admin/AdminComments'));
 const AdminLogs = lazy(() => import('./pages/admin/AdminLogs'));
-
-// Placeholders for future pages (NOT lazy loaded as they are defined inline)
-const About = () => <div><h2>About Us Page</h2><p>Information about the barangay will go here.</p></div>; // Keep as inline placeholder
-// REMOVED: const Contact = () => <div>Contact Us Page</div>; // This was removed in a previous step.
 
 // Test Page Import (Lazy Loaded)
 const ApiTestPage = lazy(() => import('./pages/ApiTestPage'));
@@ -55,12 +52,10 @@ const routes = [
       { path: 'announcements', element: <Suspense fallback={<LoadingFallback />}><AnnouncementsPage /></Suspense> },
       { path: 'officials', element: <Suspense fallback={<LoadingFallback />}><OfficialsPage /></Suspense> },
       { path: 'document-requests', element: <Suspense fallback={<LoadingFallback />}><DocumentRequestsPage /></Suspense> },
-      // Corrected: About is an inline component, no Suspense needed around it
-      { path: 'about', element: <About /> },
+      { path: 'about', element: <Suspense fallback={<LoadingFallback />}><About /></Suspense> },
     ],
   },
-  // Authentication Routes (typically not lazy-loaded if they are entry points)
-  // Corrected: SignInPage and SignUpPage are now explicitly lazy-loaded too for consistency
+  // Authentication Routes (lazy-loaded for consistency)
   { path: '/signin', element: <Suspense fallback={<LoadingFallback />}><SignInPage /></Suspense> },
   { path: '/signup', element: <Suspense fallback={<LoadingFallback />}><SignUpPage /></Suspense> },
 

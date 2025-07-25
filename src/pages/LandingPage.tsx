@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../pagestyles/LandingPage.module.css';
 import PostModal from '../components/PostModal'; 
-import headerImage from '../assets/Bambang-header.jpg'; 
+import headerImage from '../assets/2.png'; 
 // import headerImage from '../assets/Malitbog-header.png'; 
 // import headerImage from '../assets/MolinoIII-header.png'; 
 

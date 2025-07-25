@@ -12,37 +12,35 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0; /* Ensures full-width background */
+  padding: 0 20px; /* Add horizontal padding to the header itself */
   background-color: #062b76;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   height: 60px;
-  top: 0;
-  z-index: 900;
+  /* MODIFIED: Add fixed positioning for the header */
+  position: fixed; /* Make the header fixed */
+  top: 0; /* Pin it to the top */
+  width: 100%; /* Make it span full width */
+  z-index: 900; /* Ensure it stays on top of other content */
 }
 
 .headerTitle {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #062b76;
+  color: #EAECEE; /* Changed color to match typical header text on dark background */
 }
 
 .main {
   flex-grow: 1;
-  /* ENSURE: No horizontal padding here. The .innerContentWrapper will handle it. */
-  padding: 0; /* Changed from padding-top: 80px; to allow .innerContentWrapper to handle all padding */
+  padding: 0;
 }
 
-/* NEW: This wrapper handles the max-width and padding for content inside .main */
 .innerContentWrapper {
-    max-width: 1200px; /* Adjust this value as needed for your content width */
+    /* max-width: 1200px; Removed */
     margin: 0 auto; /* Centers the content wrapper horizontally */
     padding: 20px; /* Adds internal padding to the content within this wrapper */
-    padding-top: 80px; /* Add the spacing for the fixed header here */
+    padding-top: 80px; /* MODIFIED: Increased padding-top to account for fixed header height (60px header + 20px buffer) */
     box-sizing: border-box; /* Ensures padding is included in the max-width */
-}
-
-.pageContent {
-    /* This can be used for page-specific content styling, but its width and padding are now managed by .innerContentWrapper */
+    width: 100%; /* Ensure it takes full available width */
 }
 
 /* --- Sidebar Styles --- */
@@ -133,9 +131,10 @@
   cursor: pointer;
   background: none;
   border: none;
-  color: #333;
+  color: #FFFFFF; /* MODIFIED: Changed color for visibility on dark header */
   padding: 0;
-  margin-right: 20px;
+  margin-right: 20px; /* Keep existing margin if needed */
+  margin-left: 0; /* Ensure no unintended margin */
 }
 
 /* --- Footer Styles --- */
@@ -144,6 +143,9 @@
   color: #EAECEE;
   padding: 40px 0;
   margin-top: auto;
+  /* Added to ensure footer takes full width */
+  width: 100%; /* MODIFIED: Changed from 100vw to 100% to ensure it respects parent width if any */
+  box-sizing: border-box; /* Ensure padding is included in total width */
 }
 
 .footerContent {
@@ -159,13 +161,18 @@
   align-items: center;
   text-align: center;
 }
-.logoPlaceholder {
-  width: 100px;
-  height: 100px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+/*
+  * MODIFIED: Changed .logoPlaceholder to use a direct img tag in JSX
+  * and adjusted its styles to be more flexible.
+*/
+.footerLogoSection img { /* NEW style for the actual image */
+  width: 100px; /* or whatever size you need */
+  height: auto;
   margin-bottom: 15px;
+  border-radius: 50%; /* If you want it circular */
+  object-fit: cover; /* Ensures image covers area */
 }
+
 .footerLogoSection h3 {
   margin: 0;
   font-size: 1.2rem;
@@ -193,6 +200,7 @@
   color: #FFFFFF;
 }
 
+/* Cleaned up duplicate/overridden styles (Keeping these as they were in your provided CSS) */
 .sidebar { background-color: #FFFFFF; box-shadow: 0 0 20px rgba(0,0,0,0.15); height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; overflow: hidden; transition: 0.5s; padding: 0; display: flex; flex-direction: column; }
 .sidebarHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 15px; background-color: #EAECEE; position: relative; white-space: nowrap; }
 .logo { max-width: 140px; height: auto; }
@@ -205,6 +213,7 @@
 .signinBtn { background-color: #062b76; color: #FFFFFF; font-weight: bold; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; transition: background-color 0.3s; }
 .signinBtn:hover { background-color: #062b76; }
 .open { width: 250px; }
-.openbtn { font-size: 20px; cursor: pointer; background-color: #212529; color: white; padding: 10px 15px; border: none; position: fixed; top: 15px; left: 15px; z-index: 500; border-radius: 5px; }
+.openbtn { font-size: 20px; cursor: pointer; background-color: #212529; color: white; padding: 10px 15px; border: none; /* Removed fixed positioning as the header will scroll with content */ /* position: fixed; top: 15px; left: 15px; z-index: 500; */ border-radius: 5px; }
 .openbtn:hover { background-color: #495057; }
-.content { margin-top: 60px; }
+/* Removed .content as it's not directly used in MainLayout for overall content wrapping */
+/* .content { margin-top: 60px; } */
