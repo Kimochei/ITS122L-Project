@@ -3,7 +3,8 @@ import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/MainLayout.module.css';
 import logo from '../assets/skonnect-logo.png';
 import PageLoader from '../components/PageLoader'; // Import the new loader component
-import footerLogo from '../assets/3.png'; // NEW: Import the 3.png image
+// import footerLogo from '../assets/3.png'; // NEW: Import the 3.png image
+import footerLogo from '../assets/BayanngMalitbog.png'; // NEW: Import the 3.png image
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -81,14 +82,14 @@ const MainLayout = () => {
           <div className={styles.footerContent}>
             <div className={styles.footerLogoSection}>
               <img src={footerLogo} alt="Barangay Logo" className={styles.footerImage} /> {/* NEW: Footer image */}
-              <h3>Barangay Bambang</h3>
+              <h3>Bayan ng Malitbog, Barangay Sta Cruz</h3>
             </div>
             <div className={styles.footerInfo}>
               <h4>Contact Information</h4>
-              <p>📞 09690687041 (SK Chairman) </p>
-              <p>📞 (02) 813-1243 (Sangguniang Barangay)</p>
-              <p>✉️ skbambangbulakan@gmail.com</p>
-              <p>📍 Multi-Purpose Hall, Purok 3, Bambang, Bulakan, Bulacan, 3017</p>
+              <p>📞 (To be Added)</p>
+              <p>📞 (To be Added)</p>
+              <p>✉️ (To be Added)</p>
+              <p>📍 6X6H+P72, Santa Cruz, Malitbog, Southern Leyte</p>
             </div>
             <div className={styles.footerLinks}>
               <h4>Site Links</h4>

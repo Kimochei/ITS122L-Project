@@ -25,7 +25,7 @@
 }
 
 /* On desktop, the sidebar is effectively always "open" at left: 0 */
-@media (min-width: 769px) {
+@media (min-width: 729px) {
     .sidebar {
         left: 0 !important; /* Force sidebar open on desktop */
     }
@@ -137,7 +137,7 @@
     .mainContent {
         margin-left: 0; /* No margin on mobile, content takes full width */
         width: 100%; /* Content takes full width */
-        padding-top: 80px; /* Maintain space for the fixed header */
+        padding-top: 60px; /* Maintain space for the fixed header */
     }
 
     /* Mobile menu button visibility on mobile */
