@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import styles from '../pagestyles/LandingPage.module.css';
 import PostModal from '../components/PostModal'; 
-import headerImage from '../assets/2.png'; 
-// import headerImage from '../assets/Malitbog-header.png'; 
+// import headerImage from '../assets/2.png'; << BAMBANG
+import headerImage from '../assets/Malitbog-header.png'; 
 // import headerImage from '../assets/MolinoIII-header.png'; 
 
 // Define the type for a Post based on your backend schema (from api/schemas.py)
