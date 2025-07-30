@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import styles from '../layoutstyles/MainLayout.module.css';
-import logo from '../assets/skonnect-logo.png';
-import PageLoader from '../components/PageLoader'; // Import the new loader component
-// import footerLogo from '../assets/3.png'; // NEW: Import the 3.png image
-import footerLogo from '../assets/BayanngMalitbog.png'; // NEW: Import the 3.png image
+import PageLoader from '../components/PageLoader';
+import footerLogo from '../assets/BayanngMalitbog.png';
+
+// bootstrap components
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 
 const MainLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // NEW: Loading state
   const navigate = useNavigate();
 
-  const openNav = () => setSidebarOpen(true);
-  const closeNav = () => setSidebarOpen(false);
-
   const handleSignInClick = () => {
-    closeNav();
     navigate('/signin');
   };
 
@@ -39,35 +39,36 @@ const MainLayout = () => {
 
   return (
     <div className={styles.layoutContainer}>
-      {isLoading && <PageLoader />} {/* NEW: Conditionally render loader */}
-
-      <div className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''}`}>
-        <div className={styles.sidebarHeader}>
-            <img src={logo} alt="sKonnect Logo" className={styles.logo} />
-            <button className={styles.closebtn} onClick={closeNav}>
-              &times;
-            </button>
-        </div>
-        <div className={styles.navLinks}>
-            <NavLink to="/" onClick={closeNav}>Home</NavLink>
-            <NavLink to="/announcements" onClick={closeNav}>Announcements</NavLink>
-            <NavLink to="/officials" onClick={closeNav}>Barangay Officials</NavLink>
-            <NavLink to="/document-requests" onClick={closeNav}>Document Requests</NavLink>
-
-            <NavLink to="/about" onClick={closeNav}>About Us</NavLink>
-        </div>
-        <div className={styles.sidebarFooter}>
-          <button onClick={handleSignInClick} className={styles.signinBtn}>
-            Sign In
-          </button>
-        </div>
-      </div>
+      {isLoading && <PageLoader />}
 
       <div className={styles.contentWrapper}>
-        <header className={styles.appHeader}>
-          <button className={styles.openbtn} onClick={openNav}>
-            ☰
-          </button>
+        {/* navbar */}
+        <header>
+          <Navbar expand="lg" className={styles.appHeader}>
+            <Container>
+              <Navbar.Brand>
+                <img
+                  alt="Bayan ng Malitbog Logo"
+                  src={footerLogo}
+                  width="35"
+                  height="35"
+                  className="d-inline-block align-top"
+                />{' '}<b className={styles.headerTitle}>Bayan ng Malitbog, Brgy. Sta Cruz</b></Navbar.Brand>
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <Nav className={styles.navLinks + " me-auto"}>
+                  <Nav.Link onClick={() => { navigate('/') }}>Home</Nav.Link>
+                  <Nav.Link onClick={() => { navigate('/announcements') }}>Announcements</Nav.Link>
+                  <Nav.Link onClick={() => { navigate('/officials') }}>Barangay Officials</Nav.Link>
+                  <Nav.Link onClick={() => { navigate('/document-requests') }}>Document Requests</Nav.Link>
+                  <Nav.Link onClick={() => { navigate('/about') }}>About</Nav.Link>
+                </Nav>
+                <Form className="d-flex">
+                  <Button onClick={handleSignInClick} className={styles.signinBtn}>Sign In</Button>
+                </Form>
+              </Navbar.Collapse>
+            </Container>
+          </Navbar>
         </header>
 
         <main className={styles.main}>
@@ -81,7 +82,7 @@ const MainLayout = () => {
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={styles.footerLogoSection}>
-              <img src={footerLogo} alt="Barangay Logo" className={styles.footerImage} /> {/* NEW: Footer image */}
+              <img src={footerLogo} alt="Barangay Logo" className={styles.footerImage} />
               <h3>Bayan ng Malitbog, Barangay Sta Cruz</h3>
             </div>
             <div className={styles.footerInfo}>

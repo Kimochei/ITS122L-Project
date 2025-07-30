@@ -87,13 +87,12 @@
   right: 15px;
 }
 .navLinks {
-  padding: 10px 0;
   white-space: nowrap;
   flex-grow: 1;
+  padding: 10px 0;  
 }
 .navLinks a {
-  color: #212529;
-  padding: 18px 30px;
+  color: white;
   text-decoration: none;
   font-size: 18px;
   display: block;
@@ -101,6 +100,7 @@
 }
 .navLinks a:hover {
   background-color: #f0f2f5;
+  color: #212529;
 }
 .navLinks a.active {
   color: #062b76;
@@ -205,10 +205,10 @@
 .sidebarHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 15px; background-color: #EAECEE; position: relative; white-space: nowrap; }
 .logo { max-width: 140px; height: auto; }
 .closebtn { font-size: 24px; background: none; border: none; color: #606770; cursor: pointer; padding: 5px; }
-.navLinks { padding: 10px 0; white-space: nowrap; }
-.navLinks a { color: #212529; padding: 18px 30px; text-decoration: none; font-size: 18px; display: block; transition: background-color 0.2s; }
+/* .navLinks { padding: 10px 0; white-space: nowrap; } */
+/* .navLinks a { color: #212529; padding: 15px; text-decoration: none; font-size: 18px; display: block; transition: background-color 0.2s; }
 .navLinks a:hover { background-color: #f0f2f5; }
-.navLinks a.active { color: #0038A8; font-weight: 600; }
+.navLinks a.active { color: #0038A8; font-weight: 600; } */
 .sidebarFooter { margin-top: auto; padding: 25px; white-space: nowrap; }
 .signinBtn { background-color: #062b76; color: #FFFFFF; font-weight: bold; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; transition: background-color 0.3s; }
 .signinBtn:hover { background-color: #062b76; }
