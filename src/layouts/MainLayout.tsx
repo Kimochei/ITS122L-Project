@@ -44,7 +44,7 @@ const MainLayout = () => {
       <div className={styles.contentWrapper}>
         {/* navbar */}
         <header>
-          <Navbar expand="lg" className={styles.appHeader} fixed='top'>
+          <Navbar expand="lg" className={styles.appHeader} fixed='top' variant='dark'>
             <Container>
               <Navbar.Brand>
                 <img
