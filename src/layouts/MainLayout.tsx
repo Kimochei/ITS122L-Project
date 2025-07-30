@@ -12,7 +12,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
 const MainLayout = () => {
-  const [isLoading, setIsLoading] = useState(true); // NEW: Loading state
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   const handleSignInClick = () => {
@@ -44,7 +44,7 @@ const MainLayout = () => {
       <div className={styles.contentWrapper}>
         {/* navbar */}
         <header>
-          <Navbar expand="lg" className={styles.appHeader}>
+          <Navbar expand="lg" className={styles.appHeader} fixed='top'>
             <Container>
               <Navbar.Brand>
                 <img
@@ -56,7 +56,7 @@ const MainLayout = () => {
                 />{' '}<b className={styles.headerTitle}>Bayan ng Malitbog, Brgy. Sta Cruz</b></Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className={styles.navLinks + " me-auto"}>
+                <Nav variant="pills" className={styles.navLinks + " me-auto"}>
                   <Nav.Link onClick={() => { navigate('/') }}>Home</Nav.Link>
                   <Nav.Link onClick={() => { navigate('/announcements') }}>Announcements</Nav.Link>
                   <Nav.Link onClick={() => { navigate('/officials') }}>Barangay Officials</Nav.Link>
@@ -71,6 +71,7 @@ const MainLayout = () => {
           </Navbar>
         </header>
 
+        {/* content */}
         <main className={styles.main}>
           <div className={styles.innerContentWrapper}>
             <div className={styles.pageContent}>
@@ -79,6 +80,7 @@ const MainLayout = () => {
           </div>
         </main>
 
+        {/* footer */}
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={styles.footerLogoSection}>

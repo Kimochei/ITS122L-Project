@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import styles from '../pagestyles/LandingPage.module.css';
-import PostModal from '../components/PostModal'; 
-// import headerImage from '../assets/2.png'; << BAMBANG
-import headerImage from '../assets/Malitbog-header.png'; 
-// import headerImage from '../assets/MolinoIII-header.png'; 
+import PostModal from '../components/PostModal';
+import headerImage from '../assets/Malitbog-header.png';
+
+// bootstrap
+import Container from 'react-bootstrap/Container';
+import Card from 'react-bootstrap/Card';
 
 // Define the type for a Post based on your backend schema (from api/schemas.py)
 interface PostSummary {
@@ -47,7 +49,7 @@ const LandingPage = () => {
 
   return (
     <>
-    
+
       <header className={styles.hero}>
         <img src={headerImage} alt="Barangay Malitbog Header" className={styles.heroImage} />
         <div className={styles.heroContent}>
@@ -57,36 +59,52 @@ const LandingPage = () => {
       <div className={styles.heroSpacer}></div>
 
       <main className={styles.mainContent}>
-        <div className={styles.announcementsSection}>
-          <h2>Latest Announcements</h2>
-          {loading && <p>Loading...</p>}
-          {!loading && posts.length === 0 && <p>No announcements available yet.</p>}
-          {!loading && posts.length > 0 && (
-            <div className={styles.announcementsGrid}>
-              {featuredPost && (
-                <div onClick={() => setSelectedPostId(featuredPost.id)} className={styles.featuredPost}>
-                  <img src={featuredPost.primary_image_url || 'https://via.placeholder.com/800x400.png?text=No+Image'} alt={featuredPost.title} className={styles.featuredImage} loading="lazy" />
-                  <h3>{featuredPost.title}</h3>
-                  <p>{new Date(featuredPost.created_at).toLocaleString()}</p>
-                </div>
-              )}
-              <div className={styles.postList}>
-                {otherPosts.map(post => (
-                  <div onClick={() => setSelectedPostId(post.id)} key={post.id} className={styles.postListItem}>
-                    <img src={post.primary_image_url || 'https://via.placeholder.com/150x150.png?text=No+Image'} alt={post.title} loading="lazy" />
-                    <div className={styles.postListItemContent}>
-                      <h4>{post.title}</h4>
-                      <p>{new Date(post.created_at).toLocaleString()}</p>
+        <Container fluid>
+          <div className={styles.announcementsSection}>
+            <h1>Latest Announcements</h1>
+            
+            {loading && <p>Loading...</p>}
+            {!loading && posts.length === 0 && <p>No announcements available yet.</p>}
+            {!loading && posts.length > 0 && (
+              <div className={styles.announcementsGrid}>
+                {featuredPost && (
+                  // <div onClick={() => setSelectedPostId(featuredPost.id)} className={styles.featuredPost}>
+                  //   <img src={featuredPost.primary_image_url || 'https://via.placeholder.com/800x400.png?text=No+Image'} alt={featuredPost.title} className={styles.featuredImage} loading="lazy" />
+                  //   <h3>{featuredPost.title}</h3>
+                  //   <p>{new Date(featuredPost.created_at).toLocaleString()}</p>
+                  // </div>
+                  <Card onClick={() => setSelectedPostId(featuredPost.id)}>
+                    <Card.Img
+                      variant="top"
+                      src={featuredPost.primary_image_url || 'https://via.placeholder.com/800x400.png?text=No+Image'}
+                      alt={featuredPost.title}
+                      className={styles.featuredImage}
+                      loading="lazy" />
+                    <Card.Body>
+                      <Card.Title>{featuredPost.title}</Card.Title>
+                      <Card.Text style={{ color: 'gray' }}>
+                        {new Date(featuredPost.created_at).toLocaleString()}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                )}
+                <div className={styles.postList}>
+                  {otherPosts.map(post => (
+                    <div onClick={() => setSelectedPostId(post.id)} key={post.id} className={styles.postListItem}>
+                      <img src={post.primary_image_url || 'https://via.placeholder.com/150x150.png?text=No+Image'} alt={post.title} loading="lazy" />
+                      <div className={styles.postListItemContent}>
+                        <h4>{post.title}</h4>
+                        <p>{new Date(post.created_at).toLocaleString()}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div></Container>
       </main>
 
-     
+
 
       <PostModal
         postId={selectedPostId}
