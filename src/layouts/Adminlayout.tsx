@@ -5,7 +5,6 @@ import logo from '../assets/skonnect-logo-white.png';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  // Initialize sidebar as CLOSED by default. CSS will open it on desktop.
   const [sidebarOpen, setSidebarOpen] = useState(false); 
 
   const handleLogout = () => {
@@ -23,15 +22,10 @@ const AdminLayout = () => {
 
   return (
     <div className={styles.adminLayoutContainer}>
-      {/* Overlay for mobile sidebar: visible when sidebar is open */}
       {sidebarOpen && <div className={`${styles.overlay} ${sidebarOpen ? styles.active : ''}`} onClick={closeSidebar}></div>}
-
-      {/* The Admin Sidebar */}
-      {/* Apply .open / .closed based on state. CSS will handle desktop default open. */}
       <aside className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed}`}>
         <div className={styles.sidebarHeader}>
           <img src={logo} alt="sKonnect Logo" className={styles.logo} />
-          {/* Close button inside sidebar, primarily for mobile overlay */}
           <button className={styles.closebtn} onClick={closeSidebar}>
             &times;
           </button>
@@ -53,18 +47,14 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* The main content area including the fixed header */}
       <div className={styles.mainContent}>
-        {/* Fixed Header for Admin Section */}
         <header className={styles.adminHeader}>
-          {/* Hamburger menu button for mobile, positioned within header - MOVED TO BE FIRST */}
           <button className={styles.mobileMenuButton} onClick={toggleSidebar}>
             ☰
           </button>
           <span className={styles.adminHeaderTitle}>Admin Dashboard</span>
         </header>
         
-        {/* Outlet for nested routes (actual page content) */}
         <div className={styles.pageContent}>
           <Outlet />
         </div>

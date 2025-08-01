@@ -157,7 +157,6 @@ const PostModal: React.FC<PostModalProps> = ({ postId, isOpen, onClose }) => {
                       <div key={index} className={`${styles.galleryItem} ${selectedMedia?.url === item.url ? styles.selected : ''}`} onClick={() => setSelectedMedia(item)}>
                         {item.media_type.startsWith('video') ? (
                            <div className={styles.videoThumbnailWrapper}>
-                               {/* Corrected: Ensure video and source tags are properly closed and nested */}
                                <video className={styles.galleryThumbnail}><source src={item.url} type={item.media_type}></source></video> 
                                <div className={styles.playIcon}>▶</div>
                            </div>
