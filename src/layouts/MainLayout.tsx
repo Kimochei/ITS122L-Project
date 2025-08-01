@@ -19,7 +19,6 @@ const MainLayout = () => {
     navigate('/signin');
   };
 
-  // NEW: Simulate page loading
   useEffect(() => {
     // In a real app, this would be tied to actual data fetching or initial component mounts.
     // For demonstration, we'll simulate a 1.5-second load time.

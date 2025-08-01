@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import styles from '../pagestyles/AnnouncementsPage.module.css';
 import PostModal from '../components/PostModal'; // Import the reusable modal
 
+import Card from 'react-bootstrap/Card';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
 
 interface Post {
@@ -58,20 +60,28 @@ const AnnouncementsPage = () => {
         <div className={styles.postsGrid}>
           {posts.length > 0 ? (
             posts.map(post => (
-              // Each card is now a clickable div
-              <div key={post.id} className={styles.postCard} onClick={() => setSelectedPostId(post.id)}>
-                {post.primary_image_url && (
-                  <img src={post.primary_image_url} alt={post.title} className={styles.postImage} loading="lazy" />
-                )}
-                <div className={styles.postContent}>
-                  <h2>{post.title}</h2>
-                  <p>{post.content}</p>
-                  <div className={styles.postMeta}>
+              <Card key={post.id} onClick={() => setSelectedPostId(post.id)}>
+                <Card.Body className={styles.postContent}>
+                  {post.primary_image_url && (
+                        <Card.Img src={post.primary_image_url}
+                                  alt={post.title}
+                                  className={styles.postImage}
+                                  loading="lazy"
+                                  style={{marginBottom: "10px"}}/>
+                      )}
+                  <Card.Title>{post.title}</Card.Title>
+                  <Card.Text>
+                    {/* only show the first 60 words */}
+                    {post.content.split(' ').length > 60
+                      ? post.content.split(' ').slice(0, 60).join(' ') + '...'
+                      : post.content}
+                  </Card.Text>
+                  <Card.Subtitle className={styles.postMeta}>
                     <span>By: {post.author.username}</span>
                     <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
+                  </Card.Subtitle>
+                </Card.Body>
+              </Card>
             ))
           ) : (
             <p>No announcements found.</p>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from '../pagestyles/SignInPage.module.css';
+import logo from '../assets/skonnect-logo.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Fallback for local dev
 
@@ -44,6 +45,7 @@ const SignInPage = () => {
       <form className={styles.signinForm} onSubmit={handleSignIn}>
         <Link to="/" className={styles.backLink}>‹ Back to Site</Link>
 
+        <img src={logo} alt="sKonnect Logo" style={{maxWidth: "75%"}}/>
         <h2>Admin Sign In</h2>
         <div className={styles.formGroup}>
           <label htmlFor="username">Username</label>

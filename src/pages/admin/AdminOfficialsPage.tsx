@@ -134,7 +134,7 @@ const AdminOfficialsPage: React.FC = () => {
         {officials.length > 0 ? officials.map(official => (
           <div key={official.id} className={styles.officialCard}>
             <img
-              src={official.photo_url || 'https://via.placeholder.com/80'}
+              src={official.photo_url || 'https://placehold.co/80x80/EEE/31343C?text=N/A'}
               alt={official.name}
               className={styles.officialCardPhoto}
               loading="lazy" // Add lazy loading for images
