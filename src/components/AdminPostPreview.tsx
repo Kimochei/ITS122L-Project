@@ -48,8 +48,6 @@ const AdminPostPreview: React.FC<AdminPostPreviewProps> = ({ post, isOpen, onClo
   const MediaViewer = ({ media }: { media: Media | null }) => {
     if (!media) return <div className={styles.mediaPlaceholder}>No Media</div>;
 
-    // Using the URL as a key forces React to re-render the element
-    // when the source changes, which is crucial for video.
     if (media.media_type.startsWith('video')) {
       return (
         <video key={media.url} src={media.url} controls muted className={styles.mainMedia}>

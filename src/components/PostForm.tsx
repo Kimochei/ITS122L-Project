@@ -87,7 +87,6 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, onCancel, initialData, is
         </div>
         <div className={styles.mediaColumn}>
           <label>Change/Upload Primary Image</label>
-          {/* --- THIS IS THE STYLED PRIMARY UPLOAD BUTTON --- */}
           <input type="file" accept="image/*" id="primary-image-upload" className={uploaderStyles.fileInput} onChange={handlePrimaryImageChange} />
           <label htmlFor="primary-image-upload" className={uploaderStyles.uploadBox}>
             Choose Primary Image
@@ -113,7 +112,6 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, onCancel, initialData, is
         </div>
         <div className={styles.mediaColumn}>
           <label>Add New Media to Gallery</label>
-          {/* This now correctly uses the styled ImageUploader */}
           <ImageUploader files={newMediaFiles} onFilesChange={setNewMediaFiles} />
         </div>
       </div>
