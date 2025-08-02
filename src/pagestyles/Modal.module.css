@@ -9,17 +9,31 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 .content {
   background: white;
   padding: 20px 30px;
   border-radius: 8px;
   position: relative;
-  max-width: 700px; 
+  max-width: 700px;
   min-width: 300px;
   max-height: 90vh;
   max-width: 90%;
+  animation: slideInUp 0.4s ease-out;
 }
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .closeButton {
   position: absolute;
   top: 10px;
@@ -49,7 +63,7 @@
   border-radius: 8px;
   position: relative;
   width: 90vw;
-  max-width: 900px; /* Increased from 90% to a fixed larger width */
+  max-width: 1200px; /* Increased from 90% to a fixed larger width */
   max-height: 90vh; /* Add a max-height to prevent it from being too tall */
   overflow-y: auto; /* Add a scrollbar if content overflows */
 }

@@ -9,18 +9,18 @@
 }
 
 .appHeader {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 0 20px; /* Add horizontal padding to the header itself */
   background-color: #062b76;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  height: 60px;
   /* MODIFIED: Add fixed positioning for the header */
-  position: fixed; /* Make the header fixed */
-  top: 0; /* Pin it to the top */
   width: 100%; /* Make it span full width */
   z-index: 900; /* Ensure it stays on top of other content */
+}
+
+.appHeader .navbar-collapse {
+  background-color: #062b76 !important; /* Same as your header */
+  padding: 1rem 0;
 }
 
 .headerTitle {
@@ -87,13 +87,12 @@
   right: 15px;
 }
 .navLinks {
-  padding: 10px 0;
   white-space: nowrap;
   flex-grow: 1;
 }
+
 .navLinks a {
-  color: #212529;
-  padding: 18px 30px;
+  color: white !important;
   text-decoration: none;
   font-size: 18px;
   display: block;
@@ -101,18 +100,17 @@
 }
 .navLinks a:hover {
   background-color: #f0f2f5;
+  color: #212529 !important;
+  font-weight: 700 !important;
 }
-.navLinks a.active {
-  color: #062b76;
-  font-weight: 600;
-}
+
 .sidebarFooter {
   margin-top: auto;
   padding: 25px;
   white-space: nowrap;
 }
 .signinBtn {
-  background-color: #062b76;
+  background-color: #062b76 !important;
   color: #FFFFFF;
   font-weight: bold;
   width: 100%;
@@ -124,7 +122,7 @@
   transition: background-color 0.3s;
 }
 .signinBtn:hover {
-  background-color: #041e54;
+  background-color: #041e54 !important;
 }
 .openbtn {
   font-size: 1.5rem;
@@ -205,10 +203,10 @@
 .sidebarHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 15px; background-color: #EAECEE; position: relative; white-space: nowrap; }
 .logo { max-width: 140px; height: auto; }
 .closebtn { font-size: 24px; background: none; border: none; color: #606770; cursor: pointer; padding: 5px; }
-.navLinks { padding: 10px 0; white-space: nowrap; }
-.navLinks a { color: #212529; padding: 18px 30px; text-decoration: none; font-size: 18px; display: block; transition: background-color 0.2s; }
+/* .navLinks { padding: 10px 0; white-space: nowrap; } */
+/* .navLinks a { color: #212529; padding: 15px; text-decoration: none; font-size: 18px; display: block; transition: background-color 0.2s; }
 .navLinks a:hover { background-color: #f0f2f5; }
-.navLinks a.active { color: #0038A8; font-weight: 600; }
+.navLinks a.active { color: #0038A8; font-weight: 600; } */
 .sidebarFooter { margin-top: auto; padding: 25px; white-space: nowrap; }
 .signinBtn { background-color: #062b76; color: #FFFFFF; font-weight: bold; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 18px; transition: background-color 0.3s; }
 .signinBtn:hover { background-color: #062b76; }
@@ -217,3 +215,16 @@
 .openbtn:hover { background-color: #495057; }
 /* Removed .content as it's not directly used in MainLayout for overall content wrapping */
 /* .content { margin-top: 60px; } */
+@media (max-width: 1000px) {
+  .appHeader .navbar-collapse {
+    background-color: #062b76;
+  }
+  .appHeader .navLinks .nav-link {
+    color: #fff;
+    padding: 12px 20px;
+  }
+  .appHeader .navLinks .nav-link:hover {
+    background-color: #041e54;
+    color: #fff;
+  }
+}

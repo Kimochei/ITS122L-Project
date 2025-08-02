@@ -15,7 +15,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
 from typing import Optional
-                              
+
+load_dotenv()              
 
 from . import crud, models, schemas, security
 from .database import SessionLocal, engine
@@ -60,7 +61,6 @@ BUCKET_NAME = "post-media"  # Consolidated bucket name for images and videos
 
 # --- Database Connection Debugging ---
 print("--- Starting Connection Debug ---")
-load_dotenv()
 database_url = os.getenv("DATABASE_URL")
 if database_url:
     print(f"Successfully loaded DATABASE_URL: {database_url}")
